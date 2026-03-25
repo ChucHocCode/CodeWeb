@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Thanh toan";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true" />
+}
+
+<section class="card">
+    <h2>Thanh toan don dat cho</h2>
+    <div class="form-grid">
+        <label>Ma dat cho (PNR)
+            <input type="text" value="WNX7K9" />
+        </label>
+        <label>Ho ten / Email
+            <input type="text" value="nguyen.minh@demo.vn" />
+        </label>
+        <button>Tim dat cho</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>PNR</th>
+                <th>Hanh trinh</th>
+                <th>Ngay bay</th>
+                <th>Trang thai</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>WNX7K9</td>
+                <td>HAN -> SGN</td>
+                <td>28/03/2026 09:15</td>
+                <td>HELD</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="grid-2">
+    <article class="card">
+        <h3>Thong tin tien</h3>
+        <ul>
+            <li><span>Gia ve</span><strong>1.690.000d</strong></li>
+            <li><span>Thue + phi</span><strong>360.000d</strong></li>
+            <li class="total"><span>Tong</span><strong>2.050.000d</strong></li>
+        </ul>
+    </article>
+
+    <article class="card">
+        <h3>Phuong thuc thanh toan</h3>
+        <label><input type="radio" name="pay" checked /> VNPAY - QR</label>
+        <label><input type="radio" name="pay" /> Napas</label>
+        <label><input type="radio" name="pay" /> Visa / MasterCard</label>
+        <label class="check"><input type="checkbox" checked /> Dong y dieu khoan</label>
+        <div class="actions">
+            <button class="ghost">Huy</button>
+            <button>Tiep tuc</button>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="~/js/pages/payment.js" asp-append-version="true"></script>
+}

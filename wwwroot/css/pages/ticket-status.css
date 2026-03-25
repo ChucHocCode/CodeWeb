@@ -1,0 +1,49 @@
+.lookup {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.status-grid .card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-grid .card:hover {
+  box-shadow: 0 4px 12px rgba(24, 58, 108, 0.15);
+}
+
+.status-grid .card.active {
+  border-color: #1e9a64;
+  background: rgba(30, 154, 100, 0.05);
+  box-shadow: inset 0 0 0 1px #1e9a64;
+}
+
+.status-grid .card h3 {
+  color: #17304e;
+}
+
+.status-grid .card p {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .lookup,
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}

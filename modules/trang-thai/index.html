@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module Trang Thai Ve</title>
+  <link rel="stylesheet" href="../../wwwroot/css/site.css" />
+  <link rel="stylesheet" href="../../wwwroot/css/pages/ticket-status.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Package: Trang thai ve</h1>
+    <nav>
+      <a href="../../index.html">Trang chu</a>
+      <a href="../thanh-toan/index.html">Thanh toan</a>
+      <a class="active" href="../trang-thai/index.html">Trang thai ve</a>
+      <a href="../hoan-doi/index.html">Hoan / Doi ve</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Tra cuu trang thai</h2>
+      <div class="lookup">
+        <label>Nhap ma ve / PNR
+          <input type="text" value="TK123456" />
+        </label>
+        <button>Xem trang thai</button>
+      </div>
+    </section>
+
+    <section class="status-grid">
+      <article class="card">
+        <h3>Chua thanh toan</h3>
+        <p>Ve dang giu cho, chua xac nhan giao dich.</p>
+      </article>
+      <article class="card active">
+        <h3>Da thanh toan</h3>
+        <p>Tien da nhan, dang cho xuat ve dien tu.</p>
+      </article>
+      <article class="card">
+        <h3>Da xuat ve</h3>
+        <p>Khach da co e-ticket hop le.</p>
+      </article>
+      <article class="card">
+        <h3>Da huy</h3>
+        <p>Ve da huy theo yeu cau hoac qua han.</p>
+      </article>
+    </section>
+
+    <section class="card flow">
+      <h3>Flow trang thai ve</h3>
+      <p>Nhap ma -> Truy van CSDL -> Kiem tra ton tai?</p>
+      <p>False: Ve khong ton tai.</p>
+      <p>True: Tra ve 1 trong 4 trang thai va hien thi cho khach.</p>
+    </section>
+  </main>
+</body>
+<script src="../../wwwroot/js/site.js"></script>
+<script src="../../wwwroot/js/pages/ticket-status.js"></script>
+</html>

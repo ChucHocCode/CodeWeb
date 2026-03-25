@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Trang chu";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/home.css" asp-append-version="true" />
+}
+
+<section class="card">
+    <h2>He thong ban ve may bay</h2>
+    <p class="hero-note">Quan ly tim chuyen bay, thanh toan, tra cuu trang thai va xu ly hoan/doi ve.</p>
+    <div class="actions" style="margin-top:10px; justify-content:flex-start;">
+        <a class="btn-link" href="@Url.Action("Index", "Payment")">Di den Thanh toan</a>
+        <a class="btn-link" href="@Url.Action("Index", "TicketStatus")">Di den Trang thai ve</a>
+        <a class="btn-link" href="@Url.Action("Index", "RefundExchange")">Di den Hoan / Doi ve</a>
+    </div>
+</section>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module Hoan Doi Ve</title>
+  <link rel="stylesheet" href="../../wwwroot/css/site.css" />
+  <link rel="stylesheet" href="../../wwwroot/css/pages/refund-exchange.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Package: Hoan / Doi ve</h1>
+    <nav>
+      <a href="../../index.html">Trang chu</a>
+      <a href="../thanh-toan/index.html">Thanh toan</a>
+      <a href="../trang-thai/index.html">Trang thai ve</a>
+      <a class="active" href="../hoan-doi/index.html">Hoan / Doi ve</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="grid-2">
+      <article class="card">
+        <h2>Hoan ve</h2>
+        <div class="form-grid">
+          <label>Ma ve
+            <input type="text" value="TK345678" />
+          </label>
+          <label>Email
+            <input type="text" value="demo@example.com" />
+          </label>
+        </div>
+        <ul>
+          <li><span>Gia goc</span><strong>6.000.000d</strong></li>
+          <li><span>Phi hoan</span><strong>900.000d</strong></li>
+          <li class="total"><span>Tien hoan</span><strong>5.100.000d</strong></li>
+        </ul>
+        <div class="actions">
+          <button class="ghost">Tu choi</button>
+          <button>Xac nhan hoan</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Doi ve</h2>
+        <div class="form-grid">
+          <label>Ma ve
+            <input type="text" value="TK123456" />
+          </label>
+          <label>Chuyen moi
+            <input type="text" value="VN237 - HAN -> SGN" />
+          </label>
+        </div>
+        <ul>
+          <li><span>Gia cu</span><strong>5.000.000d</strong></li>
+          <li><span>Gia moi</span><strong>5.300.000d</strong></li>
+          <li class="total"><span>Thu them</span><strong>300.000d</strong></li>
+        </ul>
+        <div class="actions">
+          <button class="ghost">Huy doi</button>
+          <button data-doi>Xac nhan doi</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="card flow">
+      <h3>Flow hoan ve</h3>
+      <p>Tao yeu cau pending -> Kiem tra hop le/trung lap -> Tinh tien hoan -> Hoan tien.</p>
+      <p>That bai: rollback du lieu. Thanh cong: doi trang thai sang REFUNDED.</p>
+
+      <h3>Flow doi ve</h3>
+      <p>Gui yeu cau doi -> Kiem tra dieu kien/cho trong -> So sanh gia moi/ cu.</p>
+      <p>Gia moi cao hon: thu them. Gia moi thap hon: co the hoan chenhlech.</p>
+    </section>
+  </main>
+</body>
+<script src="../../wwwroot/js/site.js"></script>
+<script src="../../wwwroot/js/pages/hoan-doi.js"></script>
+</html>

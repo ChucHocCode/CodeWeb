@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Skyblue Airlines</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand-row">
+                <div class="brand">
+                    <div class="brand-icon">✈</div>
+                    <div>
+                        <h1>Skyblue</h1>
+                        <p>Đặt vé máy bay chuyến bay tuyệt vời</p>
+                    </div>
+                </div>
+                <div class="language-switcher">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VND | VI</span>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <a asp-controller="Home" asp-action="Index" class="nav-link">Tìm kiếm chuyến bay</a>
+                <a href="#" class="nav-link">Đặt vé & gửi chọ</a>
+                <a asp-controller="Payment" asp-action="Index" class="nav-link">Thanh toán</a>
+                <a asp-controller="TicketStatus" asp-action="Index" class="nav-link">Trạng thái vé</a>
+                <a asp-controller="RefundExchange" asp-action="Index" class="nav-link">Hoàn vé/Đổi vé</a>
+                <a href="#" class="nav-link">Liên hệ</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        @RenderBody()
+    </main>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

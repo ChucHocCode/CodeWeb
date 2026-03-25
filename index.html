@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyblue - Tim kiem chuyen bay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-row">
+        <div class="brand">
+          <span class="brand-icon">S</span>
+          <div>
+            <h1>Skyblue</h1>
+            <p>Dich vu ve may bay nhanh chong va tien loi</p>
+          </div>
+        </div>
+        <div class="header-tools">
+          <span class="tool-pill">VN</span>
+          <span class="tool-pill">VND | VI</span>
+          <span class="tool-pill">C</span>
+          <span class="tool-pill">chuc</span>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Dieu huong chinh">
+        <a class="active" href="index.html">Tim kiem chuyen bay</a>
+        <a href="modules/thanh-toan/index.html">Thanh toan</a>
+        <a href="modules/trang-thai/index.html">Trang thai ve</a>
+        <a href="modules/hoan-doi/index.html">Hoan / Doi ve</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero-block">
+      <div class="hero-copy">
+        <p class="hero-kicker">SKYBLUE AIRLINES</p>
+        <h2>Bay khap Viet Nam voi lich trinh linh hoat va gia tot moi ngay</h2>
+        <p>Hang nghin chuyen bay moi ngay, gia tot nhat cho ban.</p>
+        <div class="hero-actions">
+          <button class="btn solid">Xem tat ca chuyen bay</button>
+          <button class="btn outline">Theo doi trang thai ve</button>
+        </div>
+      </div>
+
+      <aside class="hero-side">
+        <h3>Khoi hanh trong hom nay</h3>
+        <div class="mini-flight">
+          <strong>VN223</strong>
+          <p>Ha Noi -> Sai Gon</p>
+          <small>06:15 - 08:20 | tu 1.650.000d</small>
+        </div>
+        <div class="mini-flight">
+          <strong>VJ501</strong>
+          <p>Sai Gon -> Da Nang</p>
+          <small>09:10 - 10:35 | tu 920.000d</small>
+        </div>
+        <div class="mini-flight">
+          <strong>QH148</strong>
+          <p>Ha Noi -> Phu Quoc</p>
+          <small>11:40 - 13:50 | tu 1.980.000d</small>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel">
+      <h3 class="panel-title">Dat ve va giu cho</h3>
+      <form class="flight-form" action="#">
+        <div class="form-row radio-row">
+          <label><input type="radio" name="trip" checked /> Mot chieu</label>
+          <label><input type="radio" name="trip" /> Khu hoi</label>
+        </div>
+
+        <div class="form-grid cols-5">
+          <label class="field">Tu
+            <select>
+              <option>Ha Noi (HAN)</option>
+              <option>Da Nang (DAD)</option>
+              <option>Sai Gon (SGN)</option>
+            </select>
+          </label>
+          <label class="field">Den
+            <select>
+              <option>TP HCM - Sai Gon (SGN)</option>
+              <option>Ha Noi (HAN)</option>
+              <option>Da Nang (DAD)</option>
+            </select>
+          </label>
+          <label class="field">Ngay khoi hanh
+            <input type="date" />
+          </label>
+          <label class="field">Nguoi lon (tu 12 tuoi)
+            <select>
+              <option>1 nguoi lon</option>
+              <option>2 nguoi lon</option>
+              <option>3 nguoi lon</option>
+            </select>
+          </label>
+          <label class="field">Tre em (2 - 11 tuoi)
+            <select>
+              <option>0 tre em</option>
+              <option>1 tre em</option>
+              <option>2 tre em</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-grid cols-2">
+          <label class="field">Em be (duoi 2 tuoi)
+            <select>
+              <option>0 em be</option>
+              <option>1 em be</option>
+            </select>
+          </label>
+          <label class="field">Pho thong
+            <select>
+              <option>Pho thong</option>
+              <option>Thuong gia</option>
+            </select>
+          </label>
+        </div>
+
+        <button class="btn wide solid" type="button">Tim chuyen bay</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h3 class="panel-title">Diem den noi bat</h3>
+      <div class="dest-grid">
+        <article class="dest-card">
+          <span>Pho bien nhat</span>
+          <h4>Ha Noi</h4>
+          <p>Nhieu khung gio dep, gia linh hoat.</p>
+        </article>
+        <article class="dest-card">
+          <span>Uu dai cuoi tuan</span>
+          <h4>Da Nang</h4>
+          <p>Goi gia tot cho cap doi va gia dinh.</p>
+        </article>
+        <article class="dest-card">
+          <span>Bien mua he</span>
+          <h4>Nha Trang</h4>
+          <p>Tang them hanh ly cho nhieu lich bay.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

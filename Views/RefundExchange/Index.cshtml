@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Hoan / Doi ve";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/refund-exchange.css" asp-append-version="true" />
+}
+
+<section class="grid-2">
+    <article class="card">
+        <h2>Hoan ve</h2>
+        <div class="form-grid">
+            <label>Ma ve
+                <input type="text" value="TK345678" />
+            </label>
+            <label>Email
+                <input type="text" value="demo@example.com" />
+            </label>
+        </div>
+        <ul>
+            <li><span>Gia goc</span><strong>6.000.000d</strong></li>
+            <li><span>Phi hoan</span><strong>900.000d</strong></li>
+            <li class="total"><span>Tien hoan</span><strong>5.100.000d</strong></li>
+        </ul>
+    </article>
+
+    <article class="card">
+        <h2>Doi ve</h2>
+        <div class="form-grid">
+            <label>Ma ve
+                <input type="text" value="TK123456" />
+            </label>
+            <label>Chuyen moi
+                <input type="text" value="VN237 - HAN -> SGN" />
+            </label>
+        </div>
+        <ul>
+            <li><span>Gia cu</span><strong>5.000.000d</strong></li>
+            <li><span>Gia moi</span><strong>5.300.000d</strong></li>
+            <li class="total"><span>Thu them</span><strong>300.000d</strong></li>
+        </ul>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="~/js/pages/refund-exchange.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Trang thai ve";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/ticket-status.css" asp-append-version="true" />
+}
+
+<section class="card">
+    <h2>Tra cuu trang thai ve</h2>
+    <div class="lookup">
+        <label>Nhap ma ve / PNR
+            <input type="text" value="TK123456" />
+        </label>
+        <button>Xem trang thai</button>
+    </div>
+</section>
+
+<section class="status-grid">
+    <article class="card">
+        <h3>Chua thanh toan</h3>
+        <p>Ve dang giu cho, chua xac nhan giao dich.</p>
+    </article>
+    <article class="card active">
+        <h3>Da thanh toan</h3>
+        <p>Tien da nhan, dang cho xuat ve dien tu.</p>
+    </article>
+    <article class="card">
+        <h3>Da xuat ve</h3>
+        <p>Khach da co e-ticket hop le.</p>
+    </article>
+    <article class="card">
+        <h3>Da huy</h3>
+        <p>Ve da huy theo yeu cau hoac qua han.</p>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="~/js/pages/ticket-status.js" asp-append-version="true"></script>
+}
