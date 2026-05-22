@@ -1,88 +1,90 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module Thanh Toan</title>
-  <link rel="stylesheet" href="../../wwwroot/css/site.css" />
-  <link rel="stylesheet" href="../../wwwroot/css/pages/payment.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Module Thanh Toán</title>
+    <link rel="stylesheet" href="../../wwwroot/css/site.css" />
+    <link rel="stylesheet" href="../../wwwroot/css/pages/payment.css" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>Package: Thanh toan</h1>
-    <nav>
-      <a href="../../index.html">Trang chu</a>
-      <a class="active" href="../thanh-toan/index.html">Thanh toan</a>
-      <a href="../trang-thai/index.html">Trang thai ve</a>
-      <a href="../hoan-doi/index.html">Hoan / Doi ve</a>
-    </nav>
-  </header>
+    <header class="topbar">
+        <h1>Package: Thanh Toán</h1>
+        <nav>
+            <a href="../../index.html">Trang Chủ</a>
+            <a class="active" href="../thanh-toan/index.html">Thanh Toán</a>
+            <a href="../trang-thai/index.html">Trạng Thái Vé</a>
+            <a href="../hoan-doi/index.html">Hoàn / Đổi Vé</a>
+        </nav>
+    </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Tra cuu don dat cho</h2>
-      <div class="form-grid">
-        <label>Ma dat cho (PNR)
-          <input type="text" value="WNX7K9" />
-        </label>
-        <label>Ho ten / Email
-          <input type="text" value="nguyen.minh@demo.vn" />
-        </label>
-        <button>Tim dat cho</button>
-      </div>
+    <main class="container">
+        <section class="card">
+            <h2>Tra Cứu Đơn Đặt Chỗ</h2>
+            <div class="form-grid">
+                <label>
+                    Mã Đặt Chỗ (PNR)
+                    <input type="text" value="WNX7K9" />
+                </label>
+                <label>
+                    Họ Tên / Email
+                    <input type="text" value="nguyen.minh@demo.vn" />
+                </label>
+                <button>Tìm Đặt Chỗ</button>
+            </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>PNR</th>
-            <th>Hanh trinh</th>
-            <th>Ngay bay</th>
-            <th>Trang thai</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>WNX7K9</td>
-            <td>HAN -> SGN</td>
-            <td>28/03/2026 09:15</td>
-            <td>HELD</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PNR</th>
+                        <th>Hành Trình</th>
+                        <th>Ngày Bay</th>
+                        <th>Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WNX7K9</td>
+                        <td>HAN -> SGN</td>
+                        <td>28/03/2026 09:15</td>
+                        <td>HELD</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-    <section class="grid-2">
-      <article class="card">
-        <h3>Thong tin tien</h3>
-        <ul>
-          <li><span>Gia ve</span><strong>1.690.000d</strong></li>
-          <li><span>Thue + phi</span><strong>360.000d</strong></li>
-          <li class="total"><span>Tong</span><strong>2.050.000d</strong></li>
-        </ul>
-        <p>Han giu cho: 27/03/2026 - 23:59</p>
-      </article>
+        <section class="grid-2">
+            <article class="card">
+                <h3>Thông Tin Tiền</h3>
+                <ul>
+                    <li><span>Giá Vé</span><strong>1.690.000đ</strong></li>
+                    <li><span>Thuế + Phí</span><strong>360.000đ</strong></li>
+                    <li class="total"><span>Tổng</span><strong>2.050.000đ</strong></li>
+                </ul>
+                <p>Hạn Giữ Chỗ: 27/03/2026 - 23:59</p>
+            </article>
 
-      <article class="card">
-        <h3>Phuong thuc</h3>
-        <label><input type="radio" name="pay" checked /> VNPAY - QR</label>
-        <label><input type="radio" name="pay" /> Napas</label>
-        <label><input type="radio" name="pay" /> Visa / MasterCard</label>
-        <label class="check"><input type="checkbox" checked /> Dong y dieu khoan</label>
-        <div class="actions">
-          <button class="ghost">Huy thanh toan</button>
-          <button>Tiep tuc</button>
-        </div>
-      </article>
-    </section>
+            <article class="card">
+                <h3>Phương Thức</h3>
+                <label><input type="radio" name="pay" checked /> VNPAY - QR</label>
+                <label><input type="radio" name="pay" /> Napas</label>
+                <label><input type="radio" name="pay" /> Visa / MasterCard</label>
+                <label class="check"><input type="checkbox" checked /> Đồng Ý Điều Khoản</label>
+                <div class="actions">
+                    <button class="ghost">Hủy Thanh Toán</button>
+                    <button>Tiếp Tục</button>
+                </div>
+            </article>
+        </section>
 
-    <section class="card flow">
-      <h3>Flow thanh toan</h3>
-      <p>Khoi tao -> Kiem tra hop le -> Tao QR/link -> Khach thanh toan -> Nhan ket qua.</p>
-      <p>True: Cap nhat giao dich + cap nhat ve + gui thong bao.</p>
-      <p>False: Ghi log; neu con han cho thanh toan lai, het han thi huy giao dich.</p>
-    </section>
-  </main>
+        <section class="card flow">
+            <h3>Quy Trình Thanh Toán</h3>
+            <p>Khởi Tạo → Kiểm Tra Hợp Lệ → Tạo QR/Link → Khách Thanh Toán → Nhận Kết Quả.</p>
+            <p>True: Cập Nhật Giao Dịch + Cập Nhật Vé + Gửi Thông Báo.</p>
+            <p>False: Ghi Log; Nếu Còn Hạn Cho Thanh Toán Lại, Hết Hạn Thì Hủy Giao Dịch.</p>
+        </section>
+    </main>
+    <script src="../../wwwroot/js/site.js"></script>
+    <script src="../../wwwroot/js/pages/payment.js"></script>
 </body>
-<script src="../../wwwroot/js/site.js"></script>
-<script src="../../wwwroot/js/pages/payment.js"></script>
 </html>

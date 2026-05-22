@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\WNC\\WNC.Airline.csproj": {}
+    "D:\\WNC\\WNC.Airline.csproj": {}
   },
   "projects": {
-    "C:\\WNC\\WNC.Airline.csproj": {
+    "D:\\WNC\\WNC.Airline.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\WNC\\WNC.Airline.csproj",
+        "projectUniqueName": "D:\\WNC\\WNC.Airline.csproj",
         "projectName": "WNC.Airline",
-        "projectPath": "C:\\WNC\\WNC.Airline.csproj",
+        "projectPath": "D:\\WNC\\WNC.Airline.csproj",
         "packagesPath": "C:\\Users\\LAPTOP\\.nuget\\packages\\",
-        "outputPath": "C:\\WNC\\obj\\",
+        "outputPath": "D:\\WNC\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\LAPTOP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\LAPTOP\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -64,6 +58,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.12, )"
+            },
+            "QRCoder": {
+              "target": "Package",
+              "version": "[1.6.0, )"
             }
           },
           "imports": [

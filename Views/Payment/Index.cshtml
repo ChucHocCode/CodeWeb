@@ -1,66 +1,236 @@
+@model WNCAirline.Controllers.PaymentViewModel
+
 @{
-    ViewData["Title"] = "Thanh toan";
+    ViewData["Title"] = "Thanh Toán";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true" />
-}
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .payment-page { min-height: calc(100vh - 110px); padding: 16px 0 32px; }
+    .payment-container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    .payment-container h1 { margin: 0 0 14px; font-size: 28px; font-weight: 800; color: #1a2a42; }
+    .ticket-search {
+        background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 12px;
+        display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 12px;
+    }
+    .ticket-search input, .ticket-search button {
+        height: 38px; border: 1px solid #d7e0ed; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit;
+    }
+    .ticket-search button { border: 0; background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer; padding: 0 18px; }
+    .ticket-search button:hover { background: #1f4f95; }
+    .ticket-table { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+    .ticket-row { display: grid; grid-template-columns: 1.2fr 1.2fr 1fr 170px; gap: 8px; padding: 10px 12px; align-items: center; border-bottom: 1px solid #ecf1f8; font-size: 13px; }
+    .ticket-row.header { font-size: 12px; color: #5c6778; font-weight: 700; background: #f8fafe; }
+    .ticket-row button { height: 34px; border: 1px solid #2a66b8; border-radius: 8px; background: #fff; color: #2a66b8; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .ticket-row button:hover { background: #f0f6ff; }
+    .payment-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .booking-summary, .payment-form { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 14px; }
+    .booking-summary h2, .payment-form h2 { margin: 0 0 10px; font-size: 20px; font-weight: 800; }
+    .summary-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #edf2f8; font-size: 13px; }
+    .summary-item span { color: #64748b; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; padding: 10px 0 0; }
+    .summary-total strong { color: #2a66b8; }
+.payment-fields { display: grid; gap: 8px; margin-top: 10px; }
+    .payment-fields label { font-size: 12px; color: #4e5a6f; font-weight: 700; display: grid; gap: 4px; }
+    .payment-fields input, .payment-fields select {
+        height: 38px; border: 1px solid #d7e0ed; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit;
+    }
+    .payment-fields input:focus, .payment-fields select:focus { outline: none; border-color: #2a66b8; }
+    .method-single {
+        height: 38px; border: 1px solid #d7e0ed; border-radius: 7px; padding: 0 10px;
+        display: flex; align-items: center; font-size: 13px; color: #2f3a4a; font-weight: 600; background: #f8fbff;
+    }
+    .terms-check {
+        min-height: 38px; border: 1px solid #d7e0ed; border-radius: 7px; padding: 8px 10px;
+        display: flex; align-items: center; gap: 8px; font-size: 13px; color: #2f3a4a;
+    }
+    .terms-check input[type=checkbox] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+    .form-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .btn-cancel-pay {
+        flex: 1; height: 40px; border-radius: 8px; border: 1px solid #d6dfeb;
+        background: #fff; color: #445064; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-pay {
+        flex: 2; height: 40px; border-radius: 8px; border: 0;
+        background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-pay:hover { background: #1f4f95; }
+    .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
+    .deadline-notice { margin-top: 12px; border: 1px solid #d3deed; border-radius: 8px; background: #f8fbff; padding: 10px; display: grid; gap: 4px; }
+    .deadline-notice p { margin: 0; font-size: 12px; color: #41506a; }
+    .alert-msg { margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px; background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; }
+    @@media (max-width: 1000px) {
+        .payment-layout { grid-template-columns: 1fr; }
+        .ticket-search { grid-template-columns: 1fr; }
+        .ticket-row { grid-template-columns: 1fr; }
+    }
+</style>
 
-<section class="card">
-    <h2>Thanh toan don dat cho</h2>
-    <div class="form-grid">
-        <label>Ma dat cho (PNR)
-            <input type="text" value="WNX7K9" />
-        </label>
-        <label>Ho ten / Email
-            <input type="text" value="nguyen.minh@demo.vn" />
-        </label>
-        <button>Tim dat cho</button>
-    </div>
+<div class="payment-page">
+<div class="payment-container">
+    <h1>Thanh Toán</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>PNR</th>
-                <th>Hanh trinh</th>
-                <th>Ngay bay</th>
-                <th>Trang thai</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>WNX7K9</td>
-                <td>HAN -> SGN</td>
-                <td>28/03/2026 09:15</td>
-                <td>HELD</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
+    @if (!string.IsNullOrEmpty(Model?.Message))
+    {
+        <div class="alert-msg">@Model.Message</div>
+    }
 
-<section class="grid-2">
-    <article class="card">
-        <h3>Thong tin tien</h3>
-        <ul>
-            <li><span>Gia ve</span><strong>1.690.000d</strong></li>
-            <li><span>Thue + phi</span><strong>360.000d</strong></li>
-            <li class="total"><span>Tong</span><strong>2.050.000d</strong></li>
-        </ul>
-    </article>
-
-    <article class="card">
-        <h3>Phuong thuc thanh toan</h3>
-        <label><input type="radio" name="pay" checked /> VNPAY - QR</label>
-        <label><input type="radio" name="pay" /> Napas</label>
-        <label><input type="radio" name="pay" /> Visa / MasterCard</label>
-        <label class="check"><input type="checkbox" checked /> Dong y dieu khoan</label>
-        <div class="actions">
-            <button class="ghost">Huy</button>
-            <button>Tiep tuc</button>
+    <form method="post" asp-action="Index">
+        <div class="ticket-search">
+            <input type="text" name="PNR" value="@(Model?.PNR ?? "")" placeholder="Mã đặt chỗ (PNR)" />
+            <input type="text" name="Email" value="@(Model?.Email ?? "")" placeholder="Họ tên hoặc email" />
+            <button type="submit" name="action" value="find">Tìm vé</button>
         </div>
-    </article>
-</section>
+    </form>
+
+    @if (Model != null && Model.SearchResults.Any())
+    {
+        <div class="ticket-table">
+            <div class="ticket-row header">
+                <div>PNR / Liên hệ</div>
+                <div>Hành trình</div>
+                <div>Ngày bay / Trạng thái</div>
+                <div>Thao tác</div>
+            </div>
+            @foreach (var item in Model.SearchResults)
+            {
+                <div class="ticket-row">
+                    <div>
+                        <strong>@item.PNR</strong>
+                        <div style="color:#778398;font-size:12px;margin-top:2px;">@item.Contact</div>
+                    </div>
+                    <div>@item.Route</div>
+                    <div>
+                        <div>@item.FlightDate</div>
+                        <div style="color:#64748b;font-size:12px;margin-top:2px;">@item.Status</div>
+                    </div>
+                    <div>
+                        <form method="post" asp-action="Index" style="display:inline">
+                            <input type="hidden" name="PNR" value="@item.PNR" />
+                            <input type="hidden" name="Email" value="@item.Contact" />
+                            <input type="hidden" name="action" value="pay" />
+                            <input type="hidden" name="Agree" value="true" />
+                            <button type="submit">Thanh toán</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model?.Found == true)
+    {
+        <div class="payment-layout">
+            <div class="booking-summary">
+                <h2>Thông tin đặt chỗ</h2>
+                <div class="summary-item"><span>Mã đặt chỗ (PNR)</span><strong>@Model.PNR</strong></div>
+                <div class="summary-item"><span>Liên hệ</span><strong>@Model.Email</strong></div>
+                <div class="summary-item"><span>Hành trình</span><strong>@Model.Route</strong></div>
+                <div class="summary-item"><span>Ngày bay</span><strong>@Model.FlightDate</strong></div>
+                <div class="summary-item"><span>Trạng thái</span><strong>@Model.Status</strong></div>
+
+                @if (Model.IsExchangePayment)
+                {
+                    <div class="summary-item"><span>Giá vé hiện tại</span><strong>@Model.CurrentTotal</strong></div>
+                    <div class="summary-item"><span>Giá vé mới</span><strong>@Model.ExchangeTotal</strong></div>
+                    <div class="summary-item"><span>Phí đổi vé</span><strong>@Model.ExchangeFee</strong></div>
+                    <div class="summary-total"><span>Cần thanh toán thêm</span><strong>@Model.Total</strong></div>
+                }
+                else if (Model.IsPayoutToUser)
+                {
+                    <div class="summary-item"><span>Giá vé ban đầu</span><strong>@Model.RefundBaseFare</strong></div>
+                    <div class="summary-item"><span>Thuế + phí sân bay</span><strong>@Model.RefundTaxAndAirportFee</strong></div>
+                    <div class="summary-item"><span>Phí xử lý hoàn vé</span><strong>@Model.RefundServiceFee</strong></div>
+                    <div class="summary-total"><span>Hoàn lại cho khách</span><strong>@(Model.RefundTotal ?? Model.Total)</strong></div>
+                }
+                else
+                {
+                    <div class="summary-item"><span>Giá vé</span><strong>@Model.Fare</strong></div>
+                    <div class="summary-item"><span>Thuế &amp; phí sân bay</span><strong>@Model.Tax</strong></div>
+                    <div class="summary-total"><span>Tổng cần trả</span><strong>@Model.Total</strong></div>
+                }
+
+                <div class="deadline-notice" style="margin-top:12px;">
+                    <p><strong>Thời hạn thanh toán:</strong> @(Model.PaymentDue ?? "Trong vòng 24 giờ")</p>
+                    <p>Vé sẽ tự động hủy nếu không thanh toán trước thời hạn.</p>
+                </div>
+            </div>
+
+            <div class="payment-form">
+                <h2>Phương thức thanh toán</h2>
+
+                <div class="method-single" style="margin-bottom:10px;">Quét mã QR để thanh toán nhanh</div>
+
+                <div class="payment-fields" style="margin-top:4px;">
+                    <div class="terms-check">
+                        <input type="checkbox" id="agree-terms" />
+                        <label for="agree-terms">Tôi đồng ý với điều khoản sử dụng dịch vụ của Skyblue Airlines</label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <form method="post" asp-action="Index" style="flex:1;display:flex;gap:8px;">
+                        <input type="hidden" name="PNR" value="@Model.PNR" />
+                        <input type="hidden" name="Email" value="@Model.Email" />
+                        <input type="hidden" name="Agree" id="agree-hidden" value="false" />
+                        <button type="submit" name="action" value="cancel" class="btn-cancel-pay">Hủy</button>
+                        <button type="submit" name="action" value="pay" class="btn-pay"
+                                id="btn-pay-submit" disabled>Tiếp tục thanh toán →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model?.TestData?.Any() == true)
+    {
+        <div style="margin-top:16px;">
+            <h2 style="font-size:16px;color:#3f4a5e;margin:0 0 10px;">Dữ liệu đặt chỗ hiện có</h2>
+            <div class="ticket-table">
+                <div class="ticket-row header">
+                    <div>PNR / Liên hệ</div>
+                    <div>Hành trình</div>
+                    <div>Ngày bay</div>
+                    <div>Trạng thái / Tổng tiền</div>
+                </div>
+                @foreach (var item in Model.TestData)
+                {
+                    <div class="ticket-row" style="cursor:pointer;" onclick="fillSearch('@item.PNR','@item.Contact')">
+                        <div>
+                            <strong style="color:#2a66b8;">@item.PNR</strong>
+                            <div style="color:#778398;font-size:12px;margin-top:2px;">@item.Contact</div>
+                        </div>
+                        <div>@item.Route</div>
+                        <div>@item.FlightDate</div>
+                        <div>
+                            <div>@item.Status</div>
+                            <div style="color:#2a66b8;font-weight:700;font-size:12px;margin-top:2px;">@item.Total</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <p style="font-size:12px;color:#778398;margin-top:8px;">Nhấn vào một dòng để điền tự động vào ô tìm kiếm.</p>
+        </div>
+    }
+</div>
+</div>
 
 @section Scripts {
-    <script src="~/js/pages/payment.js" asp-append-version="true"></script>
+<script>
+    const agreeChk    = document.getElementById('agree-terms');
+    const agreeHidden = document.getElementById('agree-hidden');
+    const payBtn      = document.getElementById('btn-pay-submit');
+    if (agreeChk && payBtn) {
+        agreeChk.addEventListener('change', function () {
+            payBtn.disabled = !this.checked;
+            if (agreeHidden) agreeHidden.value = this.checked ? 'true' : 'false';
+        });
+    }
+
+    function fillSearch(pnr, email) {
+        const pnrIn = document.querySelector('input[name="PNR"]');
+        const emIn  = document.querySelector('input[name="Email"]');
+        if (pnrIn) pnrIn.value = pnr;
+        if (emIn)  emIn.value  = email;
+    }
+</script>
 }

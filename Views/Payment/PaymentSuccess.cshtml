@@ -1,0 +1,75 @@
+@model WNCAirline.Controllers.PaymentSuccessViewModel
+
+@{
+    ViewData["Title"] = "Giao Dịch Thành Công";
+}
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .result-page { min-height: calc(100vh - 110px); padding: 40px 16px; display: flex; align-items: center; justify-content: center; }
+    .result-card { background: #effcf4; border: 1px solid #b9ebc9; border-radius: 14px; padding: 28px 24px; max-width: 520px; width: 100%; text-align: center; }
+    .success-tick { width: 72px; height: 72px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 40px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: result-pop .45s cubic-bezier(.175,.885,.32,1.275); }
+    @@keyframes result-pop { 0%{transform:scale(0);opacity:0} 75%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+    .result-card h2 { margin: 0 0 6px; font-size: 22px; color: #14532d; }
+    .result-card p { margin: 0 0 18px; color: #166534; font-size: 14px; }
+    .result-info { background: #fff; border: 1px solid #dde6f2; border-radius: 8px; padding: 12px; text-align: left; margin-bottom: 18px; }
+    .result-info-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #edf2f8; font-size: 13px; }
+    .result-info-row:last-child { border-bottom: 0; }
+    .result-info-row span { color: #64748b; }
+    .result-info-row strong { color: #1f2937; }
+    .result-actions { display: flex; gap: 10px; }
+    .btn-primary { flex: 1; height: 42px; border-radius: 8px; border: 0; background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .btn-primary:hover { background: #1f4f95; }
+    .btn-secondary { flex: 1; height: 42px; border-radius: 8px; border: 1px solid #d6dfeb; background: #fff; color: #445064; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+</style>
+
+<div class="result-page">
+    <div class="result-card">
+        <div class="success-tick">✓</div>
+        <h2>@(Model.IsExchangePayment ? "Đổi vé thành công!" : Model.IsPayoutToUser ? "Hoàn tiền thành công!" : "Thanh toán thành công!")</h2>
+        <p>
+            @if (Model.IsPayoutToUser)
+            {
+                <span>Đã gửi thông tin hoàn tiền về email của bạn.</span>
+            }
+            else
+            {
+                <span>Vé điện tử sẽ được gửi qua email sau vài phút.</span>
+            }
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.PNR) || !string.IsNullOrWhiteSpace(Model.Email))
+        {
+            <div class="result-info">
+                @if (!string.IsNullOrWhiteSpace(Model.PNR))
+                {
+                    <div class="result-info-row"><span>Mã đặt chỗ (PNR)</span><strong>@Model.PNR</strong></div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Route))
+                {
+                    <div class="result-info-row"><span>Hành trình</span><strong>@Model.Route</strong></div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.FlightDate))
+                {
+                    <div class="result-info-row"><span>Ngày bay</span><strong>@Model.FlightDate</strong></div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Total))
+                {
+                    <div class="result-info-row">
+                        <span>@(Model.IsExchangePayment ? "Đã thanh toán thêm" : "Tổng tiền")</span>
+                        <strong style="color:#2a66b8">@Model.Total</strong>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.PaidAt))
+                {
+                    <div class="result-info-row"><span>Thời gian xác nhận</span><strong>@Model.PaidAt</strong></div>
+                }
+            </div>
+        }
+
+        <div class="result-actions">
+            <a class="btn-primary" href="@Url.Action("Index","TicketStatus")">Xem trạng thái vé</a>
+            <a class="btn-secondary" href="@Url.Action("Index","Home")">Về trang chủ</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,268 @@
+@model WNCAirline.Controllers.MobileScanViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận thanh toán trên điện thoại</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #eef3f8;
+            --panel: #ffffff;
+            --ink: #14324f;
+            --muted: #5a6a7d;
+            --line: #d7e0ea;
+            --ok: #149647;
+            --shadow: 0 16px 40px rgba(20, 50, 79, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 58%, #e8eef6 100%);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: min(100%, 520px);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 28px 22px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.6rem, 4vw, 2rem);
+            line-height: 1.2;
+        }
+
+        .status {
+            margin: 0 0 20px;
+            color: var(--muted);
+            font-size: 1.02rem;
+            line-height: 1.5;
+        }
+
+        .agree-form {
+            margin: 0;
+        }
+
+        .ticket-info {
+            margin: 0 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px;
+            background: #f9fbff;
+            text-align: left;
+        }
+
+        .ticket-info h3 {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            color: var(--ink);
+        }
+
+        .ticket-info dl {
+            margin: 0;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 10px;
+            font-size: 0.95rem;
+        }
+
+        .ticket-info dt {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .ticket-info dd {
+            margin: 0;
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .recipient-grid {
+            display: grid;
+            gap: 10px;
+            margin: 0 0 12px;
+            text-align: left;
+        }
+
+        .recipient-grid label {
+            display: grid;
+            gap: 6px;
+            color: var(--ink);
+            font-size: 0.96rem;
+            font-weight: 700;
+        }
+
+        .recipient-grid input {
+            min-height: 44px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 0 12px;
+            font-size: 1rem;
+        }
+
+        .agree-button {
+            width: 100%;
+            min-height: 64px;
+            border: 0;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #1f9f54, #108042);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 800;
+            box-shadow: 0 12px 22px rgba(16, 128, 66, 0.28);
+        }
+
+        .hint {
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .expired {
+            margin-top: 12px;
+            color: #9a6110;
+            font-weight: 700;
+        }
+
+        .success {
+            display: grid;
+            place-items: center;
+            gap: 12px;
+            color: var(--ok);
+            padding-top: 6px;
+        }
+
+        .tick {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            border: 4px solid var(--ok);
+            position: relative;
+        }
+
+        .tick::after {
+            content: "";
+            position: absolute;
+            left: 27px;
+            top: 14px;
+            width: 18px;
+            height: 34px;
+            border: solid var(--ok);
+            border-width: 0 6px 6px 0;
+            transform: rotate(45deg);
+        }
+
+        .success strong {
+            font-size: 1.4rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        @if (!Model.IsPaid)
+        {
+            <h1>@(Model.IsPayoutToUser ? "Xác nhận hoàn tiền" : "Xác nhận thanh toán")</h1>
+            <p class="status">@Model.Message</p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.PNR))
+            {
+                <section class="ticket-info">
+                    <h3>Thông tin vé</h3>
+                    <dl>
+                        <dt>PNR</dt>
+                        <dd>@Model.PNR</dd>
+                        <dt>Email</dt>
+                        <dd>@Model.Email</dd>
+                        <dt>Hành trình</dt>
+                        <dd>@Model.Route</dd>
+                        <dt>Ngày bay</dt>
+                        <dd>@Model.FlightDate</dd>
+                        <dt>@Model.AmountLabel</dt>
+                        <dd>@Model.Total</dd>
+                    </dl>
+                </section>
+            }
+
+            @if (Model.IsExpired)
+            {
+                <p class="expired">Mã QR đã hết hạn, vui lòng quay lại màn hình thanh toán để tạo mã mới.</p>
+            }
+
+            <form method="post" asp-action="MobileScanConfirm" class="agree-form">
+                <input type="hidden" name="sessionId" value="@Model.SessionId" />
+
+                @if (Model.IsPayoutToUser && !Model.IsExpired)
+                {
+                    <div class="recipient-grid">
+                        <label>
+                            Tên người nhận
+                            <input type="text" name="recipientName" id="recipientName" value="@Model.RecipientName" autocomplete="name" required />
+                        </label>
+                        <label>
+                            Số tài khoản
+                            <input type="text" name="recipientBankAccount" id="recipientBankAccount" value="@Model.RecipientBankAccount" autocomplete="off" inputmode="numeric" required />
+                        </label>
+                    </div>
+                }
+
+                <button type="submit" class="agree-button" id="confirmButton" @(Model.IsExpired ? "disabled aria-disabled=\"true\"" : "")>Đồng ý</button>
+            </form>
+            <p class="hint">
+                @(Model.IsExpired
+                    ? "Phiên này đã hết hạn, hãy quét lại mã mới để xác nhận."
+                    : Model.IsPayoutToUser
+                        ? "Nhập đầy đủ thông tin người nhận rồi bấm Đồng ý để gửi xác nhận về máy tính."
+                        : "Bấm Đồng ý để gửi xác nhận về máy tính.")
+            </p>
+        }
+        else
+        {
+            <div class="success">
+                <span class="tick" aria-hidden="true"></span>
+                <strong>@(Model.IsPayoutToUser ? "Đã hoàn tiền thành công" : "Đã giao dịch thành công")</strong>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.PNR))
+            {
+                <section class="ticket-info">
+                    <h3>Thông tin vé</h3>
+                    <dl>
+                        <dt>PNR</dt>
+                        <dd>@Model.PNR</dd>
+                        <dt>Email</dt>
+                        <dd>@Model.Email</dd>
+                        <dt>Hành trình</dt>
+                        <dd>@Model.Route</dd>
+                        <dt>Ngày bay</dt>
+                        <dd>@Model.FlightDate</dd>
+                        <dt>@Model.AmountLabel</dt>
+                        <dd>@Model.Total</dd>
+                    </dl>
+                </section>
+            }
+        }
+    </main>
+
+</body>
+</html>

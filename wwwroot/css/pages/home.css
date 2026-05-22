@@ -1,6 +1,6 @@
 .hero-note {
   color: #5a6e86;
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   margin-bottom: 12px;
 }
 

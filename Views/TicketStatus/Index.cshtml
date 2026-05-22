@@ -1,40 +1,143 @@
+@model WNCAirline.Controllers.TicketStatusPageViewModel
+
 @{
-    ViewData["Title"] = "Trang thai ve";
+    ViewData["Title"] = "Trạng Thái Vé";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/ticket-status.css" asp-append-version="true" />
-}
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .status-page { min-height: calc(100vh - 110px); padding: 16px 0 32px; }
+    .status-container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    .status-container h1 { margin: 0 0 14px; font-size: 28px; font-weight: 800; color: #1a2a42; }
+    .search-form { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .search-group { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .search-input {
+        height: 38px; border: 1px solid #d6dfeb; border-radius: 7px; padding: 0 10px;
+        font-size: 13px; font-family: inherit;
+    }
+    .search-input:focus { outline: none; border-color: #2a66b8; }
+    .search-btn {
+        border: 0; background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer;
+        border-radius: 7px; padding: 0 18px; font-size: 13px; font-family: inherit;
+    }
+    .search-btn:hover { background: #1f4f95; }
+    .ticket-info { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; overflow: hidden; }
+    .status-tabs { display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #e7edf6; padding: 10px; }
+    .status-tabs a {
+        height: 32px; border: 1px solid #d6dfeb; border-radius: 999px;
+        background: #fff; color: #5d6a7d; font-size: 12px; padding: 0 14px; cursor: pointer;
+        display: flex; align-items: center; text-decoration: none; white-space: nowrap;
+    }
+    .status-tabs a.active { border-color: #2a66b8; background: #f1f6ff; color: #2a66b8; font-weight: 700; }
+    .status-tabs a:hover:not(.active) { background: #f5f8ff; color: #2a66b8; }
+    .transaction-table { width: 100%; border-collapse: collapse; }
+    .transaction-table th, .transaction-table td { padding: 10px 12px; border-bottom: 1px solid #edf2f8; text-align: left; font-size: 13px; }
+    .transaction-table th { background: #f8fafe; color: #5f6d82; font-size: 12px; font-weight: 700; }
+    .transaction-table tr:last-child td { border-bottom: 0; }
+    .transaction-table tr:hover td { background: #fafcff; }
+    .subtext { margin-top: 3px; color: #79869b; font-size: 12px; }
+    .tx-status { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .tx-status.ok { background: #e8f6ee; color: #0f7a3e; }
+    .tx-status.warn { background: #fff6d8; color: #8c6700; }
+    .tx-status.muted { background: #edf1f7; color: #627083; }
+    .tx-status.refund { background: #fff1f2; color: #be123c; }
+    .tx-status.exchange { background: #fef9c3; color: #a16207; }
+    .btn-view {height: 32px; border: 1px solid #2a66b8; background: #fff; color: #2a66b8; border-radius: 8px; font-weight: 700; cursor: pointer; padding: 0 10px; font-size: 12px; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-view:hover { background: #f0f6ff; }
+    .empty-row { text-align: center; color: #778398; padding: 28px 12px !important; font-size: 14px; }
+    .alert-msg { margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px; background: #e8f4ff; border: 1px solid #bee1ff; color: #1e4e8c; }
+    @@media (max-width: 860px) {
+        .search-group { grid-template-columns: 1fr; }
+        .transaction-table { display: block; overflow-x: auto; }
+    }
+</style>
 
-<section class="card">
-    <h2>Tra cuu trang thai ve</h2>
-    <div class="lookup">
-        <label>Nhap ma ve / PNR
-            <input type="text" value="TK123456" />
-        </label>
-        <button>Xem trang thai</button>
+<div class="status-page">
+<div class="status-container">
+    <h1>Trạng thái vé</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert-msg">@Model.Message</div>
+    }
+
+    <div class="search-form">
+        <form method="get" asp-action="Index">
+            <input type="hidden" name="status" value="@Model.ActiveStatus" />
+            <div class="search-group">
+                <input type="text" name="keyword" class="search-input"
+                       placeholder="Nhập mã đặt chỗ, tên hành khách..." value="@Model.Keyword" />
+                <button type="submit" class="search-btn">Tìm vé</button>
+            </div>
+        </form>
     </div>
-</section>
 
-<section class="status-grid">
-    <article class="card">
-        <h3>Chua thanh toan</h3>
-        <p>Ve dang giu cho, chua xac nhan giao dich.</p>
-    </article>
-    <article class="card active">
-        <h3>Da thanh toan</h3>
-        <p>Tien da nhan, dang cho xuat ve dien tu.</p>
-    </article>
-    <article class="card">
-        <h3>Da xuat ve</h3>
-        <p>Khach da co e-ticket hop le.</p>
-    </article>
-    <article class="card">
-        <h3>Da huy</h3>
-        <p>Ve da huy theo yeu cau hoac qua han.</p>
-    </article>
-</section>
+    <div class="ticket-info">
+        <div class="status-tabs">
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="all"
+               class="@(Model.ActiveStatus == "all" ? "active" : "")">Tất cả vé</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="held"
+               class="@(Model.ActiveStatus == "held" ? "active" : "")">Đang giữ chỗ</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="paid"
+               class="@(Model.ActiveStatus == "paid" ? "active" : "")">Đã thanh toán</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="pending-refund"
+               class="@(Model.ActiveStatus == "pending-refund" ? "active" : "")">Chờ hoàn vé</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="pending-exchange"
+               class="@(Model.ActiveStatus == "pending-exchange" ? "active" : "")">Chờ đổi vé</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="refunded"
+               class="@(Model.ActiveStatus == "refunded" ? "active" : "")">Đã hoàn vé</a>
+            <a asp-action="Index" asp-route-keyword="@Model.Keyword" asp-route-status="exchanged"
+               class="@(Model.ActiveStatus == "exchanged" ? "active" : "")">Đã đổi vé</a>
+        </div>
 
-@section Scripts {
-    <script src="~/js/pages/ticket-status.js" asp-append-version="true"></script>
-}
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>Mã đặt chỗ / Hành khách</th>
+                    <th>Trạng thái</th>
+                    <th>Sự kiện gần nhất</th>
+                    <th>Nguyên nhân</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Tickets.Any())
+                {
+                    @foreach (var item in Model.Tickets)
+                    {
+                        string statusCss = item.StatusKey switch {
+                            "paid"              => "ok",
+                            "held"              => "warn",
+                            "pending-refund"    => "refund",
+                            "pending-exchange"  => "exchange",
+                            "refunded"          => "refund",
+                            "exchanged"         => "exchange",
+                            _                   => "muted"
+                        };
+                        <tr>
+                            <td>
+                                <strong>@item.BookingCode</strong>
+                                <div class="subtext">@item.PassengerName · @item.Route</div>
+                            </td>
+                            <td>
+                                <span class="tx-status @statusCss">@item.StatusLabel</span>
+                            </td>
+                            <td>@item.LastEvent</td>
+                            <td style="color:#64748b;font-size:12px;">@item.Reason</td>
+                            <td>
+                                <a class="btn-view" asp-action="Detail" asp-route-code="@item.BookingCode">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="empty-row">Không tìm thấy vé phù hợp với bộ lọc đã chọn.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>

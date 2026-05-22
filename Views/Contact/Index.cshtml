@@ -1,0 +1,662 @@
+@{
+    ViewData["Title"] = "Liên Hệ";
+}
+
+<style>
+    :root {
+        --blue: #2a66b8;
+        --dark: #1a2a42;
+        --muted: #64748b;
+        --border: #d6e2f1;
+        --bg-light: #f0f5fc;
+        --white: #ffffff;
+        --radius: 10px;
+        --shadow: 0 2px 12px rgba(42,102,184,0.08);
+    }
+
+    .contact-page {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 20px 60px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: var(--dark);
+    }
+
+    /* ── Hero ── */
+    .contact-hero {
+        background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+        color: var(--white);
+        border-radius: var(--radius);
+        padding: 52px 40px;
+        margin: 32px 0 36px;
+        text-align: center;
+    }
+
+    .contact-hero h1 {
+        font-size: 2.1rem;
+        font-weight: 700;
+        margin: 0 0 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .contact-hero p {
+        font-size: 1.05rem;
+        opacity: 0.85;
+        margin: 0;
+    }
+
+    /* ── Info cards row ── */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 36px;
+    }
+
+    .info-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 26px 18px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(42,102,184,0.13);
+    }
+
+    .info-card .ic-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .info-card .ic-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+
+    .info-card .ic-value {
+        font-size: 0.97rem;
+        font-weight: 600;
+        color: var(--dark);
+        line-height: 1.4;
+    }
+
+    .info-card .ic-sub {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .btn-chat {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 7px 20px;
+        background: var(--blue);
+        color: var(--white);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: background 0.15s;
+    }
+
+    .btn-chat:hover {
+        background: #1d52a0;
+    }
+
+    /* ── Two-column layout ── */
+    .contact-body {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 28px;
+        align-items: start;
+    }
+
+    /* ── Form panel ── */
+    .form-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 34px 32px;
+        box-shadow: var(--shadow);
+    }
+
+    .panel-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 22px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--bg-light);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 0.83rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        font-size: 0.95rem;
+        color: var(--dark);
+        background: var(--white);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(42,102,184,0.12);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .btn-submit {
+        margin-top: 20px;
+        width: 100%;
+        padding: 13px;
+        background: var(--blue);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 0.03em;
+        transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-submit:hover {
+        background: #1d52a0;
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    /* ── Right column ── */
+    .right-col {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    /* ── Office hours ── */
+    .hours-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px 26px;
+        box-shadow: var(--shadow);
+    }
+
+    .hours-panel .panel-title {
+        margin-bottom: 16px;
+    }
+
+    .hours-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--bg-light);
+        font-size: 0.92rem;
+    }
+
+    .hours-row:last-child {
+        border-bottom: none;
+    }
+
+    .hours-row .day {
+        color: var(--muted);
+        font-weight: 500;
+    }
+
+    .hours-row .time {
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .hours-row .badge {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .badge-open { background: #e6f4ec; color: #1a7a40; }
+    .badge-short { background: #fff7e6; color: #b36b00; }
+
+    /* ── FAQ accordion ── */
+    .faq-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px 26px;
+        box-shadow: var(--shadow);
+    }
+
+    .faq-item {
+        border-bottom: 1px solid var(--bg-light);
+    }
+
+    .faq-item:last-child {
+        border-bottom: none;
+    }
+
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        cursor: pointer;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--dark);
+        user-select: none;
+        gap: 10px;
+    }
+
+    .faq-question:hover {
+        color: var(--blue);
+    }
+
+    .faq-chevron {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--bg-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: var(--blue);
+        transition: transform 0.2s, background 0.15s;
+        font-style: normal;
+    }
+
+    .faq-item.open .faq-chevron {
+        transform: rotate(180deg);
+        background: var(--blue);
+        color: var(--white);
+    }
+
+    .faq-answer {
+        display: none;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.65;
+        padding-bottom: 13px;
+    }
+
+    .faq-item.open .faq-answer {
+        display: block;
+    }
+
+    /* ── Social chips ── */
+    .social-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px 26px;
+        box-shadow: var(--shadow);
+    }
+
+    .social-chips {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+
+    .social-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1.5px solid var(--border);
+        color: var(--dark);
+        transition: all 0.15s;
+    }
+
+    .social-chip:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+        background: var(--bg-light);
+    }
+
+    .social-chip .sc-icon {
+        font-size: 1rem;
+    }
+
+    /* ── Toast ── */
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #1a7a40;
+        color: #fff;
+        padding: 14px 24px;
+        border-radius: 8px;
+        font-size: 0.93rem;
+        font-weight: 600;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity 0.25s, transform 0.25s;
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 1000px) {
+        .info-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .contact-body {
+            grid-template-columns: 1fr;
+        }
+
+        .right-col {
+            order: -1;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .info-cards {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-hero {
+            padding: 36px 20px;
+        }
+
+        .contact-hero h1 {
+            font-size: 1.55rem;
+        }
+
+        .form-panel {
+            padding: 24px 18px;
+        }
+    }
+
+    @@media (max-width: 420px) {
+        .info-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="contact-page">
+
+    <!-- Hero -->
+    <div class="contact-hero">
+        <h1>Liên hệ &amp; Hỗ trợ</h1>
+        <p>Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn mọi lúc, mọi nơi.</p>
+    </div>
+
+    <!-- Info cards -->
+    <div class="info-cards">
+        <div class="info-card">
+            <span class="ic-icon">📞</span>
+            <div class="ic-label">Hotline</div>
+            <div class="ic-value">1900 1100</div>
+            <div class="ic-sub">Hỗ trợ 24/7</div>
+        </div>
+        <div class="info-card">
+            <span class="ic-icon">📧</span>
+            <div class="ic-label">Email</div>
+            <div class="ic-value">support@skyblue.vn</div>
+            <div class="ic-sub">Phản hồi trong 2 giờ</div>
+        </div>
+        <div class="info-card">
+            <span class="ic-icon">💬</span>
+            <div class="ic-label">Live Chat</div>
+            <div class="ic-value">Chat trực tiếp</div>
+            <button class="btn-chat" onclick="alert('Tính năng chat đang được tải...')">Mở Chat</button>
+        </div>
+        <div class="info-card">
+            <span class="ic-icon">🏢</span>
+            <div class="ic-label">Văn phòng</div>
+            <div class="ic-value">68 Trần Hưng Đạo</div>
+            <div class="ic-sub">Q1, TP. Hồ Chí Minh</div>
+        </div>
+    </div>
+
+    <!-- Body: form + right col -->
+    <div class="contact-body">
+
+        <!-- Contact form -->
+        <div class="form-panel">
+            <div class="panel-title">Gửi yêu cầu hỗ trợ</div>
+            <form id="contactForm" novalidate>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cf-name">Họ và tên</label>
+                        <input type="text" id="cf-name" placeholder="Nguyễn Văn A" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="cf-email">Email</label>
+                        <input type="email" id="cf-email" placeholder="email@example.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="cf-phone">Số điện thoại</label>
+                        <input type="tel" id="cf-phone" placeholder="09x xxx xxxx" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cf-subject">Chủ đề</label>
+                        <select id="cf-subject">
+                            <option value="">-- Chọn chủ đề --</option>
+                            <option value="booking">Đặt vé</option>
+                            <option value="payment">Thanh toán</option>
+                            <option value="refund">Hoàn - đổi vé</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="cf-message">Nội dung</label>
+                        <textarea id="cf-message" placeholder="Mô tả chi tiết vấn đề bạn gặp phải..." required></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Gửi yêu cầu</button>
+            </form>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+
+            <!-- Office hours -->
+            <div class="hours-panel">
+                <div class="panel-title">Giờ làm việc</div>
+                <div class="hours-row">
+                    <span class="day">Thứ Hai – Thứ Sáu</span>
+                    <span class="time">08:00 – 22:00</span>
+                    <span class="badge badge-open">Mở cửa</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Thứ Bảy – Chủ Nhật</span>
+                    <span class="time">09:00 – 18:00</span>
+                    <span class="badge badge-short">Rút gọn</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Hotline 1900 1100</span>
+                    <span class="time">24/7</span>
+                    <span class="badge badge-open">Luôn mở</span>
+                </div>
+            </div>
+
+            <!-- FAQ accordion -->
+            <div class="faq-panel">
+                <div class="panel-title">Câu hỏi thường gặp</div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Làm thế nào để hủy / hoàn vé?
+                        <i class="faq-chevron">&#8964;</i>
+                    </div>
+                    <div class="faq-answer">
+                        Bạn truy cập mục <strong>Hoàn &amp; Đổi vé</strong> trên trang web, nhập mã đặt chỗ và email. Phí hủy tùy theo hạng vé và thời điểm hủy trước giờ bay (trước 24h, 2h, v.v.). Hoàn vé miễn phí áp dụng trong vòng 24 giờ kể từ khi đặt chỗ nếu chuyến bay còn hơn 7 ngày.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Thời gian hoàn tiền mất bao lâu?
+                        <i class="faq-chevron">&#8964;</i>
+                    </div>
+                    <div class="faq-answer">
+                        Thời gian hoàn tiền thường từ <strong>5 – 15 ngày làm việc</strong> tùy phương thức thanh toán. Thẻ tín dụng / ghi nợ: 7–10 ngày. Ví điện tử (MoMo, ZaloPay): 3–5 ngày. Chuyển khoản ngân hàng: 5–7 ngày. Bạn sẽ nhận thông báo qua email khi tiền được hoàn.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Tôi có thể đổi chuyến bay không?
+                        <i class="faq-chevron">&#8964;</i>
+                    </div>
+                    <div class="faq-answer">
+                        Có, bạn có thể đổi chuyến tối đa <strong>2 lần</strong> trước giờ khởi hành. Phí đổi chuyến tùy theo hạng vé. Vé Eco Flex và Business không tính phí đổi chuyến lần đầu. Chênh lệch giá vé (nếu có) sẽ được tính thêm hoặc hoàn lại.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Hành lý xách tay được phép bao nhiêu kg?
+                        <i class="faq-chevron">&#8964;</i>
+                    </div>
+                    <div class="faq-answer">
+                        Hành lý xách tay tiêu chuẩn: <strong>7 kg</strong>, kích thước không quá 56 × 36 × 23 cm. Hạng Thương gia (Business): tối đa <strong>14 kg</strong>. Hành lý ký gửi được mua thêm (20 kg / 30 kg) khi đặt vé hoặc ít nhất 6 tiếng trước giờ bay.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Làm thế nào để check-in trực tuyến?
+                        <i class="faq-chevron">&#8964;</i>
+                    </div>
+                    <div class="faq-answer">
+                        Check-in trực tuyến mở từ <strong>48 giờ đến 1 giờ</strong> trước giờ khởi hành. Vào mục <em>Tra cứu chuyến bay</em>, nhập mã đặt chỗ và họ tên, chọn ghế và in / tải thẻ lên máy bay. Bạn cũng có thể check-in qua ứng dụng di động SkyBlue Airlines.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Social links -->
+            <div class="social-panel">
+                <div class="panel-title">Kết nối với chúng tôi</div>
+                <div class="social-chips">
+                    <a href="#" class="social-chip">
+                        <span class="sc-icon">📘</span> Facebook
+                    </a>
+                    <a href="#" class="social-chip">
+                        <span class="sc-icon">✖</span> Twitter / X
+                    </a>
+                    <a href="#" class="social-chip">
+                        <span class="sc-icon">📸</span> Instagram
+                    </a>
+                    <a href="#" class="social-chip">
+                        <span class="sc-icon">▶</span> YouTube
+                    </a>
+                </div>
+            </div>
+
+        </div><!-- /right-col -->
+    </div><!-- /contact-body -->
+
+</div><!-- /contact-page -->
+
+<!-- Success toast -->
+<div class="toast" id="successToast">Yêu cầu đã được gửi thành công! Chúng tôi sẽ phản hồi trong 2 giờ.</div>
+
+<script>
+    // FAQ accordion
+    function toggleFaq(questionEl) {
+        var item = questionEl.parentElement;
+        var wasOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item.open').forEach(function (el) {
+            el.classList.remove('open');
+        });
+        // Open clicked if it wasn't already open
+        if (!wasOpen) {
+            item.classList.add('open');
+        }
+    }
+
+    // Contact form submit → toast
+    document.getElementById('contactForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('cf-name').value.trim();
+        var email = document.getElementById('cf-email').value.trim();
+        var message = document.getElementById('cf-message').value.trim();
+        if (!name || !email || !message) {
+            alert('Vui lòng điền đầy đủ Họ tên, Email và Nội dung.');
+            return;
+        }
+        var toast = document.getElementById('successToast');
+        toast.classList.add('show');
+        setTimeout(function () {
+            toast.classList.remove('show');
+        }, 4000);
+        // Reset form
+        document.getElementById('contactForm').reset();
+    });
+</script>

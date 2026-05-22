@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\WNC\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Remove-Item -Path \"D:\\\\WNC\\\\Models\\\\Flight copy.cs\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item -Path \"D:\\\\WNC\\\\Models\\\\FlightSearchModel copy.cs\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item -Path \"D:\\\\WNC\\\\Models\\\\User copy.cs\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Write-Host \"Removed copy model files\")",
+      "Bash(dotnet build *)",
+      "PowerShell(Get-Process *)",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet tool install *)",
+      "PowerShell(netstat *)",
+      "PowerShell(Start-Process -FilePath \"dotnet\" -ArgumentList \"run\",\"--project\",\"D:\\\\WNC\\\\WNC.Airline.csproj\",\"--no-build\" -WorkingDirectory \"D:\\\\WNC\" -WindowStyle Hidden -PassThru | Select-Object Id)",
+      "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\",\"cd /d D:\\\\WNC\\\\airplane-tickets-web-clean\\\\frontend && npm run dev -- --port 5173 --host\" -WindowStyle Hidden -PassThru | Select-Object Id)",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\WNC\" -Depth 2)",
+      "Bash(Select-Object -First 30)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(Start-Process -FilePath \"dotnet\" -ArgumentList \"run\",\"--project\",\"D:\\\\WNC\\\\WNC.Airline.csproj\",\"--urls\",\"http://localhost:8091\" -WorkingDirectory \"D:\\\\WNC\" -WindowStyle Minimized)"
+    ]
+  }
+}

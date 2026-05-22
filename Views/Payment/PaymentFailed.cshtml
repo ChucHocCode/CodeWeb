@@ -1,0 +1,23 @@
+@model WNCAirline.Controllers.PaymentFailedViewModel
+
+@{
+    ViewData["Title"] = "Thanh Toán Thất Bại";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true" />
+}
+
+<section class="card payment-mobile-card">
+    <h2>Thanh toán thất bại</h2>
+    <p class="mobile-status">@Model.Message</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Code))
+    {
+        <p>Mã lỗi: <strong>@Model.Code</strong></p>
+    }
+
+    <div class="actions">
+        <a class="btn-link" href="@Url.Action("Index", "Payment")">Thử lại thanh toán</a>
+    </div>
+</section>

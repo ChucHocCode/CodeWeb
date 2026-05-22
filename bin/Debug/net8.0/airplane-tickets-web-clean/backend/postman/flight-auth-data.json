@@ -1,0 +1,72 @@
+[
+  {
+    "scenario": "TC01_Login_Success_Customer",
+    "user_email": "hongvt@gmail.com",
+    "user_password": "123456",
+    "expected_http_code": 200,
+    "description": "Đăng nhập thành công với tài khoản khách hàng hợp lệ"
+  },
+  {
+    "scenario": "TC02_Login_Success_Staff",
+    "user_email": "lc02022005@gmail.com",
+    "user_password": "staffpassword",
+    "expected_http_code": 200,
+    "description": "Đăng nhập thành công với tài khoản nhân viên"
+  },
+  {
+    "scenario": "TC03_Login_Wrong_Password",
+    "user_email": "hongvt@gmail.com",
+    "user_password": "wrongpassword999",
+    "expected_http_code": 401,
+    "description": "Thất bại khi nhập sai mật khẩu"
+  },
+  {
+    "scenario": "TC04_Login_Account_Locked",
+    "user_email": "bad_user@gmail.com",
+    "user_password": "password123",
+    "expected_http_code": 401,
+    "description": "Tài khoản bị khóa do vi phạm chính sách đặt vé"
+  },
+  {
+    "scenario": "TC05_Login_Unregistered_Email",
+    "user_email": "notfound@gmail.com",
+    "user_password": "password123",
+    "expected_http_code": 401,
+    "description": "Email chưa được đăng ký trên hệ thống"
+  },
+  {
+    "scenario": "TC06_Login_Empty_Email",
+    "user_email": "",
+    "user_password": "password123",
+    "expected_http_code": 400,
+    "description": "Lỗi khi để trống trường email"
+  },
+  {
+    "scenario": "TC07_Login_Success_Chi",
+    "user_email": "Chi@gmail.com",
+    "user_password": "123456",
+    "expected_http_code": 200,
+    "description": "Đăng nhập thành công với tài khoản Chi"
+  },
+  {
+    "scenario": "TC08_Login_Invalid_Format_Email",
+    "user_email": "vuhong.gmail.com",
+    "user_password": "password123",
+    "expected_http_code": 401,
+    "description": "Email sai định dạng"
+  },
+  {
+    "scenario": "TC09_Login_SQL_Injection_Attempt",
+    "user_email": "' OR 1=1 --",
+    "user_password": "password123",
+    "expected_http_code": 401,
+    "description": "Kiểm tra bảo mật chống tấn công SQL Injection"
+  },
+  {
+    "scenario": "TC10_Login_Case_Sensitive_Pass",
+    "user_email": "hongvt@gmail.com",
+    "user_password": "YOURPASSWORD123",
+    "expected_http_code": 401,
+    "description": "Mật khẩu có phân biệt chữ hoa chữ thường"
+  }
+]

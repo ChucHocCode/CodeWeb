@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #e8edf4;
   --blue-900: #1c4f92;
   --blue-800: #2b69b5;
@@ -123,12 +123,11 @@ p {
   border-color: #e8f2ff;
 }
 
-.page-shell {
-  max-width: 1040px;
-  margin: 12px auto 28px;
-  padding: 0 16px;
-  display: grid;
-  gap: 14px;
+.page-shell { 
+    width: 90%;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding : 0 20px;
 }
 
 .hero-block {

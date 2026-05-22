@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WNCAirline.Models;
 
 public class Ticket
 {
+    [Key]
     public string Code { get; set; } = string.Empty;
     public string Passenger { get; set; } = string.Empty;
     public int Price { get; set; }

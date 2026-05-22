@@ -1,60 +1,61 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module Trang Thai Ve</title>
-  <link rel="stylesheet" href="../../wwwroot/css/site.css" />
-  <link rel="stylesheet" href="../../wwwroot/css/pages/ticket-status.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Module Trạng Thái Vé</title>
+    <link rel="stylesheet" href="../../wwwroot/css/site.css" />
+    <link rel="stylesheet" href="../../wwwroot/css/pages/ticket-status.css" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>Package: Trang thai ve</h1>
-    <nav>
-      <a href="../../index.html">Trang chu</a>
-      <a href="../thanh-toan/index.html">Thanh toan</a>
-      <a class="active" href="../trang-thai/index.html">Trang thai ve</a>
-      <a href="../hoan-doi/index.html">Hoan / Doi ve</a>
-    </nav>
-  </header>
+    <header class="topbar">
+        <h1>Package: Trạng Thái Vé</h1>
+        <nav>
+            <a href="../../index.html">Trang Chủ</a>
+            <a href="../thanh-toan/index.html">Thanh Toán</a>
+            <a class="active" href="../trang-thai/index.html">Trạng Thái Vé</a>
+            <a href="../hoan-doi/index.html">Hoàn / Đổi Vé</a>
+        </nav>
+    </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Tra cuu trang thai</h2>
-      <div class="lookup">
-        <label>Nhap ma ve / PNR
-          <input type="text" value="TK123456" />
-        </label>
-        <button>Xem trang thai</button>
-      </div>
-    </section>
+    <main class="container">
+        <section class="card">
+            <h2>Tra Cứu Trạng Thái</h2>
+            <div class="lookup">
+                <label>
+                    Nhập Mã Vé / PNR
+                    <input type="text" value="TK123456" />
+                </label>
+                <button>Xem Trạng Thái</button>
+            </div>
+        </section>
 
-    <section class="status-grid">
-      <article class="card">
-        <h3>Chua thanh toan</h3>
-        <p>Ve dang giu cho, chua xac nhan giao dich.</p>
-      </article>
-      <article class="card active">
-        <h3>Da thanh toan</h3>
-        <p>Tien da nhan, dang cho xuat ve dien tu.</p>
-      </article>
-      <article class="card">
-        <h3>Da xuat ve</h3>
-        <p>Khach da co e-ticket hop le.</p>
-      </article>
-      <article class="card">
-        <h3>Da huy</h3>
-        <p>Ve da huy theo yeu cau hoac qua han.</p>
-      </article>
-    </section>
+        <section class="status-grid">
+            <article class="card">
+                <h3>Chưa Thanh Toán</h3>
+                <p>Vé đang giữ chỗ, chưa xác nhận giao dịch.</p>
+            </article>
+            <article class="card active">
+                <h3>Đã Thanh Toán</h3>
+                <p>Tiền đã nhận, đang chờ xuất vé điện tử.</p>
+            </article>
+            <article class="card">
+                <h3>Đã Xuất Vé</h3>
+                <p>Khách đã có e-ticket hợp lệ.</p>
+            </article>
+            <article class="card">
+                <h3>Đã Hủy</h3>
+                <p>Vé đã hủy theo yêu cầu hoặc quá hạn.</p>
+            </article>
+        </section>
 
-    <section class="card flow">
-      <h3>Flow trang thai ve</h3>
-      <p>Nhap ma -> Truy van CSDL -> Kiem tra ton tai?</p>
-      <p>False: Ve khong ton tai.</p>
-      <p>True: Tra ve 1 trong 4 trang thai va hien thi cho khach.</p>
-    </section>
-  </main>
+        <section class="card flow">
+            <h3>Quy Trình Trạng Thái Vé</h3>
+            <p>Nhập mã → Truy vấn CSDL → Kiểm tra tồn tại?</p>
+            <p>False: Vé không tồn tại.</p>
+            <p>True: Trả về 1 trong 4 trạng thái và hiển thị cho khách.</p>
+        </section>
+    </main>
 </body>
 <script src="../../wwwroot/js/site.js"></script>
 <script src="../../wwwroot/js/pages/ticket-status.js"></script>

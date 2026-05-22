@@ -1,49 +1,190 @@
-.lookup {
+.ticket-shell {
+  padding: 14px;
+}
+
+.page-title {
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.search-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  align-items: end;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+.search-row input[type="text"] {
+  height: 42px;
+  font-size: 1rem;
 }
 
-.status-grid .card {
-  cursor: pointer;
+.search-row button {
+  min-width: 96px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  text-decoration: none;
+  color: #5f6f86;
+  border: 1px solid #c9d7ea;
+  background: #f7f9fd;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.94rem;
+  font-weight: 700;
   transition: all 0.2s ease;
 }
 
-.status-grid .card:hover {
-  box-shadow: 0 4px 12px rgba(24, 58, 108, 0.15);
+.chip:hover {
+  border-color: #4c7cc2;
+  color: #2f67b6;
 }
 
-.status-grid .card.active {
-  border-color: #1e9a64;
-  background: rgba(30, 154, 100, 0.05);
-  box-shadow: inset 0 0 0 1px #1e9a64;
+.chip.active {
+  border-color: #4c7cc2;
+  color: #2f67b6;
+  background: #ecf3ff;
 }
 
-.status-grid .card h3 {
-  color: #17304e;
+.table-wrap {
+  border: 1px solid #d7e0ec;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.status-grid .card p {
+.status-table {
+  margin-top: 0;
+}
+
+.status-table thead {
+  background: #f5f8fd;
+}
+
+.status-table th,
+.status-table td {
+  border-left: none;
+  border-right: none;
+  padding: 8px 10px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.status-table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+.booking-code {
+  display: block;
+  color: #1c3554;
+  margin-bottom: 3px;
+}
+
+.status-table small {
+  color: #5a6e86;
+  font-size: 0.95rem;
+}
+
+.ticket-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.badge-issued {
+  background: #daf3df;
+  color: #12723f;
+}
+
+.badge-paid {
+  background: #daf3df;
+  color: #12723f;
+}
+
+.badge-refunded {
+  background: #fde4ea;
+  color: #b51e58;
+}
+
+.badge-pending-refund {
+  background: #fff0cc;
+  color: #99651d;
+}
+
+.badge-pending-exchange {
+  background: #e8efff;
+  color: #355aa9;
+}
+
+.badge-exchanged {
+  background: #fff1c8;
+  color: #8f6306;
+}
+
+.badge-held {
+  background: #e8edf6;
+  color: #3d5678;
+}
+
+.detail-link {
+  min-height: 34px;
+  font-size: 0.98rem;
+  padding: 0 12px;
+  background: #edf3fb;
+  color: #2f67b6;
+  border: 1px solid #c6d5ea;
+}
+
+.detail-link:hover {
+  background: #dfeaf9;
+  box-shadow: none;
+  transform: none;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ghost-link {
+  background: #edf3fb;
+  color: #2f67b6;
+  border: 1px solid #c6d5ea;
+}
+
+.empty-row {
+  text-align: center;
+  color: #5a6e86;
+  font-weight: 600;
+  padding: 14px;
 }
 
 @media (max-width: 900px) {
-  .status-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .status-table {
+    min-width: 860px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
   }
 }
 
-@media (max-width: 680px) {
-  .lookup,
-  .status-grid {
+@media (max-width: 640px) {
+  .search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 }

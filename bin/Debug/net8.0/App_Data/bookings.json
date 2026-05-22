@@ -1,0 +1,98 @@
+[
+  {
+    "PNR": "WNX7K9",
+    "Contact": "nguyen.minh@demo.vn",
+    "Route": "HAN -\u003E SGN",
+    "FlightDate": "28/03/2026 09:15",
+    "Status": "HELD",
+    "Fare": "1.690.000\u0111",
+    "Tax": "360.000\u0111",
+    "Total": "2.050.000\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  },
+  {
+    "PNR": "WNA2P4",
+    "Contact": "tran.ha@demo.vn",
+    "Route": "DAD -\u003E HAN",
+    "FlightDate": "29/03/2026 16:30",
+    "Status": "HELD",
+    "Fare": "1.200.000\u0111",
+    "Tax": "290.000\u0111",
+    "Total": "1.490.000\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  },
+  {
+    "PNR": "WNB5L1",
+    "Contact": "pham.quynh@demo.vn",
+    "Route": "SGN -\u003E CXR",
+    "FlightDate": "02/04/2026 06:45",
+    "Status": "PAID",
+    "Fare": "980.000\u0111",
+    "Tax": "210.000\u0111",
+    "Total": "1.190.000\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  },
+  {
+    "PNR": "WNC8R3",
+    "Contact": "le.tuan@demo.vn",
+    "Route": "HAN -\u003E PQC",
+    "FlightDate": "06/04/2026 11:10",
+    "Status": "HELD",
+    "Fare": "1.850.000\u0111",
+    "Tax": "400.000\u0111",
+    "Total": "2.250.000\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  },
+  {
+    "PNR": "WND1M6",
+    "Contact": "hoang.nam@demo.vn",
+    "Route": "SGN -\u003E HPH",
+    "FlightDate": "11/04/2026 20:20",
+    "Status": "HELD",
+    "Fare": "1.450.000\u0111",
+    "Tax": "330.000\u0111",
+    "Total": "1.780.000\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  },
+  {
+    "PNR": "WNK9RQ",
+    "Contact": "w",
+    "Route": "HAN -\u003E SGN",
+    "FlightDate": "12/06/2026 06:00",
+    "Status": "EXCHANGED",
+    "Fare": "1,433,040\u0111",
+    "Tax": "171,964\u0111",
+    "Total": "1,605,004\u0111",
+    "ExchangeTotal": "1.670.263 \u0111",
+    "PaymentDue": "265.259 \u0111"
+  },
+  {
+    "PNR": "WN43VU",
+    "Contact": "lc02022005@gmail.com",
+    "Route": "HAN -\u003E SGN",
+    "FlightDate": "13/12/2026 05:30",
+    "Status": "EXCHANGED",
+    "Fare": "1,675,193\u0111",
+    "Tax": "201,023\u0111",
+    "Total": "1,876,216\u0111",
+    "ExchangeTotal": "1.654.255 \u0111",
+    "PaymentDue": "-21.961 \u0111"
+  },
+  {
+    "PNR": "WNY7PW",
+    "Contact": "lc02022005@gmail.com",
+    "Route": "SGN -\u003E DAD",
+    "FlightDate": "11/11/2026 08:00",
+    "Status": "HELD",
+    "Fare": "772,230\u0111",
+    "Tax": "92,667\u0111",
+    "Total": "864,897\u0111",
+    "ExchangeTotal": "",
+    "PaymentDue": ""
+  }
+]

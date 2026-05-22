@@ -1,0 +1,265 @@
+@model List<WNCAirline.Models.Flight>
+@{
+    int vbPax = ViewBag.PaxCount ?? 1;
+    int vbAdults = ViewBag.AdultCount ?? 1;
+    int vbChildren = ViewBag.ChildCount ?? 0;
+    int vbInfants = ViewBag.InfantCount ?? 0;
+    string paxLabel = vbPax == 1 ? "1 hành khách"
+        : $"{vbAdults} người lớn"
+          + (vbChildren > 0 ? $" · {vbChildren} trẻ em" : "")
+          + (vbInfants > 0 ? $" · {vbInfants} em bé" : "");
+}
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .route-summary-bar {
+        background: #fbfdff; border: 1px solid #d8e3f2; border-radius: 8px;
+        padding: 12px 14px; display: flex; justify-content: space-between;
+        align-items: center; margin-bottom: 12px;
+    }
+    .route-summary-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+        border: 0; background: transparent; font-size: 14px; font-weight: 600;
+        cursor: pointer; color: #2a66b8; padding: 0; font-family: inherit;
+    }
+    .back-btn:hover { text-decoration: underline; }
+    .route-summary-title { font-size: 16px; font-weight: 800; color: #1a2a42; margin: 0; }
+    .route-summary-date { font-size: 13px; color: #64748b; margin: 2px 0 0; }
+    .pax-chip {
+        border: 1px solid #d6e0f0; border-radius: 20px; background: #fff;
+        padding: 5px 14px; font-size: 12px; font-weight: 600; color: #445064;
+    }
+
+    .search-layout { display: grid; grid-template-columns: 292px 1fr; gap: 12px; }
+
+    .filters-sidebar {
+        background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px;
+        align-self: start;
+    }
+    .filter-title { font-size: 18px; font-weight: 800; color: #1a2a42; margin: 0 0 12px; }
+    .filter-group { border-top: 1px solid #edf2f8; padding-top: 12px; margin-top: 12px; }
+    .filter-group-label { font-size: 12px; font-weight: 700; color: #516077; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 8px; }
+    .filter-check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: #2d3a4a; }
+    .filter-check input { width: 15px; height: 15px; cursor: pointer; accent-color: #2a66b8; }
+    .filter-apply-btn {
+        width: 100%; height: 36px; border-radius: 7px; font-size: 13px; font-weight: 700;
+        cursor: pointer; font-family: inherit; margin-top: 4px;
+    }
+    .filter-apply-btn.clear {
+        border: 1px solid #d1d5db; background: #f9fafb; color: #374151;
+    }
+    .filter-apply-btn.clear:hover { background: #e5e7eb; }
+
+    .flights-section { min-width: 0; }
+    .flights-toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; align-items: center; gap: 8px; }
+    .flights-count { font-size: 13px; color: #64748b; flex: 1; }
+    .sort-select {
+        height: 36px; border: 1px solid #d5deea; border-radius: 7px;
+        padding: 0 10px; font-size: 13px; color: #2d3a4a;
+        background: #fff; cursor: pointer; font-family: inherit;
+    }
+    .flights-list { display: grid; gap: 12px; }
+
+    .flight-card {
+        background: #fff; border: 1px solid #dce6f3; border-radius: 10px;
+        padding: 16px; display: grid;
+        grid-template-columns: 220px 1fr 190px;
+        gap: 14px; align-items: center;
+        transition: box-shadow .18s;
+    }
+    .flight-card:hover { box-shadow: 0 4px 18px rgba(42,102,184,.13); }
+    .flight-card.hidden { display: none; }
+
+    .airline-col { display: flex; align-items: center; gap: 10px; }
+    .airline-icon {
+        width: 36px; height: 36px; border-radius: 8px; background: #e8f1ff;
+        color: #2a66b8; display: flex; align-items: center; justify-content: center;
+        font-size: 18px; flex-shrink: 0;
+    }
+    .airline-name { font-size: 14px; font-weight: 700; color: #1a2a42; }
+    .airline-number { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .flight-details { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; }
+    .flight-segment { }
+    .flight-segment .time { font-size: 26px; font-weight: 800; color: #111827; line-height: 1; }
+    .flight-segment .airport { color: #5f6d80; font-weight: 600; font-size: 13px; margin-top: 3px; }
+    .flight-segment.arr { text-align: right; }
+    .flight-duration { text-align: center; }
+    .flight-duration .dur-line {
+        height: 2px; background: #d0d9e6; border-radius: 2px; margin: 6px 0;
+        position: relative;
+    }
+    .flight-duration .dur-line::before, .flight-duration .dur-line::after {
+        content: ''; width: 6px; height: 6px; border-radius: 50%;
+        background: #d0d9e6; position: absolute; top: -2px;
+    }
+    .flight-duration .dur-line::before { left: 0; }
+    .flight-duration .dur-line::after { right: 0; }
+    .flight-duration .dur-time { font-size: 12px; color: #64748b; }
+    .flight-duration .dur-stops { font-size: 11px; color: #16a34a; font-weight: 600; }
+
+    .price-col { display: grid; justify-items: end; gap: 6px; }
+    .price-note { font-size: 12px; color: #64748b; }
+    .flight-price { font-size: 26px; color: #2a66b8; font-weight: 800; line-height: 1; }
+    .book-btn {
+        width: 112px; height: 36px; border: 0; border-radius: 8px;
+        background: #2a66b8; color: #fff; font-weight: 700; font-size: 14px;
+        cursor: pointer; font-family: inherit; text-decoration: none;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .book-btn:hover { background: #1f4f95; }
+
+    .empty-note {
+        background: #fff9db; border: 1px solid #f2e6a7; color: #7a5b00;
+        border-radius: 8px; padding: 20px; text-align: center; font-size: 14px;
+    }
+
+    @@media (max-width: 900px) {
+        .search-layout { grid-template-columns: 1fr; }
+        .filters-sidebar { display: none; }
+        .flight-card { grid-template-columns: 1fr; gap: 10px; }
+        .price-col { justify-items: start; flex-direction: row; }
+        .flight-segment.arr { text-align: left; }
+    }
+</style>
+
+<div class="route-summary-bar">
+    <div class="route-summary-left">
+        <button class="back-btn" onclick="goBackToSearch()">← Quay lại</button>
+        <div>
+            <p class="route-summary-title">@ViewBag.Route</p>
+            <p class="route-summary-date">@ViewBag.Date</p>
+        </div>
+    </div>
+    <div class="pax-chip">@paxLabel · Hạng phổ thông</div>
+</div>
+
+<div class="search-layout">
+    <aside class="filters-sidebar">
+        <p class="filter-title">Bộ lọc</p>
+
+        <div class="filter-group">
+            <p class="filter-group-label">Hãng hàng không</p>
+            @{
+                var airlines = (Model ?? []).Select(f => f.Airline).Distinct().OrderBy(a => a).ToList();
+            }
+            @foreach (var airline in airlines)
+            {
+                <label class="filter-check">
+                    <input type="checkbox" class="filter-airline" value="@airline"> @airline
+                </label>
+            }
+        </div>
+
+        <div class="filter-group">
+            <button type="button" id="btnClearFilter" class="filter-apply-btn clear">Xóa bộ lọc</button>
+        </div>
+    </aside>
+
+    <section class="flights-section">
+        <div class="flights-toolbar">
+            <span class="flights-count" id="flightsCount"></span>
+            <select id="sortSelect" class="sort-select">
+                <option value="suggest">Đề xuất</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+            </select>
+        </div>
+
+        <div class="flights-list" id="flightListContainer">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var flight in Model)
+                {
+                    var durationH = flight.Duration / 60;
+                    var durationM = flight.Duration % 60;
+                    var durationStr = flight.Duration > 0 ? $"{durationH}h {durationM:D2}m" : "---";
+                    <div class="flight-card flight-item"
+                         data-airline="@flight.Airline"
+                         data-price="@flight.BasePrice">
+                        <div class="airline-col">
+                            <div class="airline-icon">✈</div>
+                            <div>
+                                <div class="airline-name">@flight.Airline</div>
+                                <div class="airline-number">@flight.FlightNumber</div>
+                            </div>
+                        </div>
+
+                        <div class="flight-details">
+                            <div class="flight-segment dep">
+                                <div class="time">@flight.DepartureTime.ToString("HH:mm")</div>
+                                <div class="airport">@flight.DepartureCity</div>
+                            </div>
+                            <div class="flight-duration">
+                                <div class="dur-time">@durationStr</div>
+                                <div class="dur-line"></div>
+                                <div class="dur-stops">Bay thẳng</div>
+                            </div>
+                            <div class="flight-segment arr">
+                                <div class="time">@flight.ArrivalTime.ToString("HH:mm")</div>
+                                <div class="airport">@flight.ArrivalCity</div>
+                            </div>
+                        </div>
+
+                        <div class="price-col">
+                            <span class="price-note">Giá mỗi khách</span>
+                            <span class="flight-price">@flight.BasePrice.ToString("N0") đ</span>
+                            <a href="/Home/Booking?flightId=@flight.Id&pax=@vbPax&adults=@vbAdults&children=@vbChildren&infants=@vbInfants" class="book-btn">Chọn</a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-note">✈ Không tìm thấy chuyến bay nào phù hợp yêu cầu của bạn.</div>
+            }
+        </div>
+    </section>
+</div>
+
+<script>
+    (function () {
+        var allItems = document.querySelectorAll('.flight-item');
+        var countEl = document.getElementById('flightsCount');
+
+        function updateCount() {
+            var visible = document.querySelectorAll('.flight-item:not(.hidden)').length;
+            if (countEl) countEl.textContent = visible + ' chuyến bay';
+        }
+
+        function applyFilters() {
+            var checked = Array.from(document.querySelectorAll('.filter-airline:checked')).map(function(el) { return el.value; });
+            allItems.forEach(function(card) {
+                var airline = card.getAttribute('data-airline');
+                var show = checked.length === 0 || checked.indexOf(airline) !== -1;
+                card.classList.toggle('hidden', !show);
+            });
+            updateCount();
+        }
+
+        document.querySelectorAll('.filter-airline').forEach(function(cb) {
+            cb.addEventListener('change', applyFilters);
+        });
+
+        document.getElementById('btnClearFilter').addEventListener('click', function() {
+            document.querySelectorAll('.filter-airline').forEach(function(cb) { cb.checked = false; });
+            applyFilters();
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            var sortType = this.value;
+            var container = document.getElementById('flightListContainer');
+            var items = Array.from(container.querySelectorAll('.flight-item'));
+            items.sort(function(a, b) {
+                var pa = parseFloat(a.getAttribute('data-price'));
+                var pb = parseFloat(b.getAttribute('data-price'));
+                if (sortType === 'price-asc') return pa - pb;
+                if (sortType === 'price-desc') return pb - pa;
+                return 0;
+            });
+            items.forEach(function(el) { container.appendChild(el); });
+        });
+
+        updateCount();
+    })();
+</script>

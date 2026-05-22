@@ -1,47 +1,432 @@
+@model WNCAirline.Controllers.RefundExchangeViewModel
+
 @{
-    ViewData["Title"] = "Hoan / Doi ve";
+    ViewData["Title"] = "Hoàn / Đổi Vé";
+    bool hasBooking = Model.Booking is not null;
+    bool canProc = Model.CanProcess;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/refund-exchange.css" asp-append-version="true" />
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .refund-exchange-page { min-height: calc(100vh - 110px); padding: 16px 0 32px; }
+    .re-container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+    .re-container h1 { margin: 0 0 20px; font-size: 28px; font-weight: 800; color: #1a2332; }
+
+    .search-section { margin-bottom: 20px; }
+    .search-form { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,.05); }
+    .search-group { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .search-input { border: 1px solid #d6dfeb; border-radius: 7px; font-size: 13px; font-family: inherit; height: 40px; padding: 0 12px; }
+    .search-input:focus { outline: none; border-color: #2a66b8; box-shadow: 0 0 0 3px rgba(42,102,184,.1); }
+    .search-btn { border: 0; background: #2a66b8; color: #fff; font-weight: 700; font-size: 13px; padding: 0 24px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+    .search-btn:hover { background: #1f4d8f; }
+    .search-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .error-message { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .success-message { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+
+    .ticket-info-section { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,.05); }
+    .ticket-header h3 { margin: 0 0 4px; font-size: 18px; color: #1a2332; font-weight: 700; }
+    .ticket-meta { font-size: 13px; color: #5f6d82; }
+    .route-box { display: flex; align-items: center; gap: 20px; padding: 10px 0; }
+    .city-pair { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .city-pair strong { font-size: 16px; color: #1a2332; font-weight: 700; }
+    .city-pair .arrow { font-size: 20px; color: #2a66b8; }
+    .date-info { font-size: 13px; color: #5f6d82; }
+
+    .action-tabs { display: flex; gap: 12px; margin-bottom: 20px; }
+    .tab-button {
+        padding: 10px 24px; border: 1px solid #d6e2f1; background: #fff; color: #5f6d82;
+        border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;
+        transition: all .3s; font-family: inherit;
+    }
+    .tab-button:hover:not(.active) { border-color: #2a66b8; color: #2a66b8; }
+    .tab-button.active { background: #2a66b8; border-color: #2a66b8; color: #fff; }
+    .tab-button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .form-section { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,.05); animation: slideDown .3s ease; }
+    @@keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+    .form-layout { display: flex; flex-direction: column; gap: 20px; }
+    .form-step { display: flex; gap: 16px; }
+    .step-number {
+        display: flex; align-items: center; justify-content: center;
+        min-width: 32px; width: 32px; height: 32px; background: #f0f4fb;
+        border: 2px solid #2a66b8; border-radius: 50%; color: #2a66b8; font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .step-content { flex: 1; }
+    .step-content h4 { margin: 0 0 12px; font-size: 14px; color: #1a2332; font-weight: 700; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .form-group label { font-weight: 600; font-size: 13px; color: #1a2332; }
+    .form-select, .form-input, .form-textarea {
+        border: 1px solid #d6dfeb; border-radius: 6px; font-size: 13px; font-family: inherit; padding: 10px 12px;
+    }
+    .form-select:focus, .form-input:focus, .form-textarea:focus { outline: none; border-color: #2a66b8; box-shadow: 0 0 0 3px rgba(42,102,184,.1); }
+    .form-select, .form-input { height: 40px; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-static-text {
+        height: 40px; display: flex; align-items: center; padding: 0 12px;
+        background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #374151;
+    }
+    .form-text { font-size: 12px; color: #5f6d82; margin-top: 4px; }
+
+    .passenger-selection { display: flex; flex-direction: column; gap: 8px; }
+    .passenger-box { display: flex; gap: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e8ecf3; border-radius: 8px; }
+    .passenger-checkbox { display: flex; align-items: flex-start; padding-top: 2px; flex-shrink: 0; }
+    .passenger-checkbox input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: #2a66b8; }
+    .passenger-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .passenger-name { font-size: 14px; font-weight: 700; color: #1a2332; }
+    .passenger-info { font-size: 12px; color: #5f6d82; }
+
+    .flights-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .ex-day-header { font-size: 12px; font-weight: 700; color: #2a66b8; background: #eef4ff; border-radius: 5px; padding: 4px 10px; margin-top: 12px; margin-bottom: 2px; }
+    .ex-day-header:first-child { margin-top: 0; }
+    .flight-radio { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f9fafb; border: 1px solid #e8ecf3; border-radius: 6px; cursor: pointer; }
+    .flight-radio:hover { background: #f0f4fb; border-color: #d0ddf6; }
+    .flight-radio input[type=radio] { flex-shrink: 0; accent-color: #2a66b8; }
+    .flight-radio-content { flex: 1; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; }
+    .flight-rc-info { font-size: 13px; color: #1a2332; font-weight: 600; }
+    .flight-rc-info small { font-weight: 400; color: #5f6d82; display: block; font-size: 11px; }
+    .flight-rc-times { font-size: 13px; color: #374151; white-space: nowrap; }
+    .flight-rc-price { font-size: 13px; font-weight: 700; color: #2a66b8; white-space: nowrap; text-align: right; }
+
+    .price-table { background: #f9fafb; border: 1px solid #e8ecf3; border-radius: 6px; overflow: hidden; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #e8ecf3; font-size: 13px; }
+    .price-row:last-child { border-bottom: 0; }
+    .price-row span { color: #5f6d82; font-weight: 500; }
+    .price-row strong { color: #1a2332; font-weight: 700; }
+    .price-row.total { background: #eef4ff; border-top: 2px solid #d0ddf6; font-weight: 700; }
+    .price-row.total span { color: #1a2332; }
+    .price-row.total strong { color: #2a66b8; font-size: 14px; }
+    .price-row.negative { background: #f0fdf4; }
+    .price-row.negative strong { color: #22a447; }
+
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #e8ecf3; margin-top: 16px; }
+    .btn-cancel-re { padding: 10px 24px; border: 1px solid #d0ddf6; border-radius: 6px; background: #f0f4fb; color: #2a66b8; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; text-decoration: none; }
+    .btn-cancel-re:hover { background: #e3ecf8; }
+    .btn-submit-re { padding: 10px 32px; border: none; border-radius: 6px; background: #2a66b8; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; min-width: 160px; }
+    .btn-submit-re:hover:not(:disabled) { background: #1f4d8f; }
+    .btn-submit-re:disabled { opacity: .5; cursor: not-allowed; }
+
+    .bank-amount-notice { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #1e40af; margin-bottom: 14px; }
+
+    .scene-toast { position: fixed; right: 20px; top: 20px; z-index: 1000; max-width: 420px; background: #ecfdf3; border: 1px solid #8ce2ad; color: #116534; border-radius: 10px; padding: 12px 14px; font-size: 13px; font-weight: 700; box-shadow: 0 10px 28px rgba(17,101,52,.16); display: none; }
+
+    @@media (max-width: 768px) {
+        .route-box { flex-direction: column; gap: 8px; }
+        .form-step { flex-direction: column; gap: 8px; }
+        .form-actions { flex-direction: column-reverse; }
+    }
+</style>
+
+@if (Model.ShowSuccessPopup)
+{
+    <div class="scene-toast" id="successToast">@Model.SuccessPopupTitle — @Model.SuccessPopupMessage</div>
 }
 
-<section class="grid-2">
-    <article class="card">
-        <h2>Hoan ve</h2>
-        <div class="form-grid">
-            <label>Ma ve
-                <input type="text" value="TK345678" />
-            </label>
-            <label>Email
-                <input type="text" value="demo@example.com" />
-            </label>
-        </div>
-        <ul>
-            <li><span>Gia goc</span><strong>6.000.000d</strong></li>
-            <li><span>Phi hoan</span><strong>900.000d</strong></li>
-            <li class="total"><span>Tien hoan</span><strong>5.100.000d</strong></li>
-        </ul>
-    </article>
+<div class="refund-exchange-page">
+<div class="re-container">
+    <h1>Hoàn vé / Đổi vé</h1>
 
-    <article class="card">
-        <h2>Doi ve</h2>
-        <div class="form-grid">
-            <label>Ma ve
-                <input type="text" value="TK123456" />
-            </label>
-            <label>Chuyen moi
-                <input type="text" value="VN237 - HAN -> SGN" />
-            </label>
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="@(Model.Message.Contains("thành công") || Model.Message.Contains("Yêu cầu") ? "success-message" : "error-message")">
+            @Model.Message
         </div>
-        <ul>
-            <li><span>Gia cu</span><strong>5.000.000d</strong></li>
-            <li><span>Gia moi</span><strong>5.300.000d</strong></li>
-            <li class="total"><span>Thu them</span><strong>300.000d</strong></li>
-        </ul>
-    </article>
-</section>
+    }
+
+    <div class="search-section">
+        <div class="search-form">
+            <form method="get" asp-action="Index">
+                <div class="search-group">
+                    <input type="text" name="code" class="search-input"
+                           value="@Model.Code" placeholder="Nhập mã đặt chỗ (PNR), VD: WNB5L1" required />
+                    <button type="submit" class="search-btn">Tải thông tin vé</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (hasBooking)
+    {
+        var routeParts = Model.Booking!.Route.Split("->", StringSplitOptions.TrimEntries);
+        var fromCity = routeParts.Length > 0 ? routeParts[0] : "---";
+        var toCity   = routeParts.Length > 1 ? routeParts[1] : "---";
+        <div class="ticket-info-section">
+            <div class="ticket-header">
+                <h3>@Model.Booking.PNR</h3>
+                <div class="ticket-meta">Trạng thái: @Model.Booking.Status · Liên hệ: @Model.Booking.Contact</div>
+            </div>
+            <div class="route-box">
+                <div class="city-pair">
+                    <strong>@fromCity</strong>
+                    <span class="arrow">→</span>
+                    <strong>@toCity</strong>
+                </div>
+                <div class="date-info">Ngày bay: @Model.Booking.FlightDate</div>
+            </div>
+        </div>
+
+        <div class="action-tabs">
+            <button type="button" class="tab-button active" id="tab-refund"
+                    onclick="switchMode('refund')" @(!canProc ? "disabled" : "")>Hoàn vé</button>
+            <button type="button" class="tab-button" id="tab-exchange"
+                    onclick="switchMode('exchange')" @(!canProc ? "disabled" : "")>Đổi vé</button>
+        </div>
+
+        <form method="post" asp-action="SubmitRequest">
+            <input type="hidden" name="code" value="@Model.Code" />
+            <input type="hidden" id="modeInput" name="mode" value="refund" />
+
+            <div class="form-section">
+                <div class="form-layout">
+
+                    <div class="form-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Chọn hành khách</h4>
+                            <div class="passenger-selection">
+                                <div class="passenger-box">
+                                    <div class="passenger-checkbox">
+                                        <input type="checkbox" id="selectedPassenger" checked @(!canProc ? "disabled" : "") />
+                                    </div>
+                                    <div class="passenger-details">
+                                        <div class="passenger-name">Người lớn (ADT)</div>
+                                        <div class="passenger-info">PNR: @(Model.Booking?.PNR ?? "-") · Giá vé: @Model.BaseFare</div>
+                                        <div class="passenger-info">Email: @(Model.Booking?.Contact ?? "-") · Ngày bay: @(Model.Booking?.FlightDate ?? "-")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4 id="step2-title">Nguyên nhân hoàn vé</h4>
+                            <div class="form-group">
+                                <label>Chọn nguyên nhân</label>
+                                <select id="refundReason" name="reason" class="form-select" @(!canProc ? "disabled" : "")>
+                                    <option value="personal_plan">Thay đổi kế hoạch cá nhân</option>
+                                    <option value="schedule_changed">Hãng thay đổi lịch bay</option>
+                                    <option value="medical_issue">Lý do sức khỏe</option>
+                                    <option value="document_issue">Sai thông tin giấy tờ</option>
+                                    <option value="route_change">Muốn đổi sang chuyến bay khác</option>
+                                    <option value="other">Lý do khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Ghi chú thêm (không bắt buộc)</label>
+                                <input type="text" name="note" class="form-input"
+                                       placeholder="Mô tả thêm chi tiết..." @(!canProc ? "disabled" : "") />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step" id="refundBlock">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Chi tiết hoàn tiền dự kiến</h4>
+                            <div class="price-table">
+                                <div class="price-row"><span>Giá vé ban đầu</span><strong id="baseFare">@Model.BaseFare</strong></div>
+                                <div class="price-row"><span>Thuế + phí sân bay</span><strong id="taxAmount">@Model.TaxAmount</strong></div>
+                                <div class="price-row"><span>Phí xử lý hoàn vé</span><strong id="serviceFee">@Model.ServiceFee</strong></div>
+                                <div class="price-row total"><span>Số tiền hoàn lại thực tế</span><strong id="refundTotal">@Model.RefundTotal</strong></div>
+                            </div>
+                            <div class="form-text" style="margin-top:8px;">Tiền hoàn sẽ được chuyển về tài khoản nguồn trong 5–10 ngày làm việc.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-step" id="exchangeBlock" style="display:none">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Chọn chuyến bay mới</h4>
+                            @if (Model.ExchangeOptions.Count == 0)
+                            {
+                                <div style="padding:12px;background:#f5f7fb;border:1px solid #d6e2f1;border-radius:6px;text-align:center;color:#5f6d82;font-size:13px;">
+                                    Không tìm thấy chuyến bay tương lai phù hợp để đổi.
+                                </div>
+                            }
+                            else
+                            {
+                                var minIso = Model.ExchangeOptions.Min(o => o.DepartureTime).Date.ToString("yyyy-MM-dd");
+                                var maxIso = Model.ExchangeOptions.Max(o => o.DepartureTime).Date.ToString("yyyy-MM-dd");
+                                var dayCount = Model.ExchangeOptions.Select(o => o.DepartureTime.Date).Distinct().Count();
+                                <div class="form-group" style="margin-bottom:10px;">
+                                    <label style="font-size:13px;font-weight:600;color:#1a2332;display:block;margin-bottom:6px;">Ngày bay mới</label>
+                                    <input type="date" id="exchangeDatePicker" class="form-input"
+                                           min="@minIso" max="@maxIso" style="max-width:220px;"
+                                           @(!canProc ? "disabled" : "") />
+                                    <div class="form-text">Có @dayCount ngày bay trong vòng 35 ngày tới</div>
+                                </div>
+                                <div id="exchangeFlightsForDate" class="flights-list"></div>
+                                <script type="application/json" id="exchangeOptionsData">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExchangeOptions.Select(o => new { key = o.Key, flightNumber = o.FlightNumber, airline = o.Airline, departureText = o.DepartureText, arrivalText = o.ArrivalText, priceText = o.PriceText, price = o.Price, dateKey = o.DepartureTime.Date.ToString("yyyy-MM-dd") })))</script>
+
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                                    <div class="form-group">
+                                        <label style="font-size:13px;font-weight:600;color:#1a2332;display:block;margin-bottom:6px;">Hạng ghế mới</label>
+                                        <select id="exchangeSeatClass" class="form-select" onchange="onExchangeOptionsChange()" @(!canProc ? "disabled" : "")>
+                                            <option value="0">Phổ thông (+0 đ/khách)</option>
+                                            <option value="90000">Thương gia (+90.000 đ/khách)</option>
+                                            <option value="300000">Hạng nhất (+300.000 đ/khách)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="font-size:13px;font-weight:600;color:#1a2332;display:block;margin-bottom:6px;">Số hành khách</label>
+                                        <input type="number" id="exchangePaxCount" class="form-input" value="1" min="1" max="9"
+                                               onchange="onExchangeOptionsChange()" @(!canProc ? "disabled" : "") />
+                                    </div>
+                                </div>
+                                <div id="exchangePaxRows" style="margin-top:12px;display:grid;gap:8px;"></div>
+                            }
+
+                            <div class="price-table" style="margin-top:12px;">
+                                <div class="price-row"><span>Tổng tiền vé hiện tại</span><strong id="currentTotal">@Model.CurrentTotal</strong></div>
+                                <div class="price-row"><span>Tổng tiền vé mới</span><strong id="newFlightTotal">@Model.CurrentTotal</strong></div>
+                                <div class="price-row"><span>Phụ phí hạng ghế</span><strong id="seatClassFee">0 đ</strong></div>
+                                <div class="price-row"><span>Phí đổi vé</span><strong id="exchangeFee">@Model.ExchangeFee</strong></div>
+                                <div class="price-row total"><span id="exchangeSettlementLabel">Số tiền cần thanh toán thêm</span><strong id="exchangePayTotal">@Model.ExchangeFee</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a class="btn-cancel-re" asp-controller="Home" asp-action="Index">Quay lại</a>
+                        <button type="submit" id="submitBtn" class="btn-submit-re" @(!canProc ? "disabled" : "")>
+                            Gửi yêu cầu hoàn vé
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.Code))
+    {
+        <div style="text-align:center;padding:40px 20px;color:#778398;font-size:15px;">
+            Không tìm thấy đặt chỗ với mã <strong style="color:#1a2332;">@Model.Code</strong>. Vui lòng kiểm tra lại mã PNR.
+        </div>
+    }
+    else
+    {
+        <div style="text-align:center;padding:40px 20px;color:#778398;font-size:15px;">
+            Nhập mã đặt chỗ (PNR) để tra cứu thông tin vé và thực hiện hoàn/đổi vé.
+        </div>
+    }
+</div>
+</div>
 
 @section Scripts {
-    <script src="~/js/pages/refund-exchange.js" asp-append-version="true"></script>
+<script>
+    var currentMode = 'refund';
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('modeInput').value = mode;
+        document.getElementById('tab-refund').classList.toggle('active', mode === 'refund');
+        document.getElementById('tab-exchange').classList.toggle('active', mode === 'exchange');
+        document.getElementById('refundBlock').style.display = mode === 'refund' ? '' : 'none';
+        document.getElementById('exchangeBlock').style.display = mode === 'exchange' ? '' : 'none';
+        document.getElementById('step2-title').innerText = mode === 'refund' ? 'Nguyên nhân hoàn vé' : 'Nguyên nhân đổi vé';
+        const btn = document.getElementById('submitBtn');
+        if (btn) btn.innerText = mode === 'refund' ? 'Gửi yêu cầu hoàn vé' : 'Gửi yêu cầu đổi vé';
+    }
+
+    var _lastFlightPrice = 0;
+
+    function renderPaxRows() {
+        var container = document.getElementById('exchangePaxRows');
+        if (!container) return;
+        var paxEl = document.getElementById('exchangePaxCount');
+        var pax = Math.max(1, Math.min(9, parseInt(paxEl?.value || '1') || 1));
+        var canProcJS = @(canProc ? "true" : "false");
+        var dis = canProcJS ? '' : 'disabled';
+        var html = '';
+        for (var i = 1; i <= pax; i++) {
+            html += '<div style="background:#f9fafb;border:1px solid #e8ecf3;border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;align-items:center;">'
+                + '<span style="font-size:13px;font-weight:700;color:#2a66b8;min-width:22px;">' + i + '</span>'
+                + '<select name="paxType_' + i + '" class="form-select" style="height:36px;" ' + dis + '>'
+                + '<option value="adult">Người lớn (ADT)</option>'
+                + '<option value="child">Trẻ em (CHD)</option>'
+                + '</select>'
+                + '<input type="text" name="exchangeSeat_' + i + '" class="form-input" style="height:36px;" placeholder="Ghế VD: 12A" ' + dis + ' />'
+                + '</div>';
+        }
+        container.innerHTML = html;
+    }
+
+    function onExchangeOptionsChange() {
+        renderPaxRows();
+        if (_lastFlightPrice > 0) recalcExchange(_lastFlightPrice);
+    }
+
+    function updateExchangePrice(radio) {
+        _lastFlightPrice = parseInt(radio.dataset.price) || 0;
+        recalcExchange(_lastFlightPrice);
+    }
+
+    function recalcExchange(baseFlightPrice) {
+        const seatClassEl = document.getElementById('exchangeSeatClass');
+        const paxEl = document.getElementById('exchangePaxCount');
+        const seatFee = parseInt(seatClassEl?.value || '0') || 0;
+        const pax = Math.max(1, parseInt(paxEl?.value || '1') || 1);
+        const currentTotalEl = document.getElementById('currentTotal');
+        const currentTotal = parseInt((currentTotalEl?.innerText || '0').replace(/[^0-9]/g, '')) || 0;
+        const exchangeFixedFee = 200000;
+        const newPrice = (baseFlightPrice + seatFee) * pax;
+        const diff = newPrice - currentTotal + exchangeFixedFee;
+        const fmt = n => n.toLocaleString('vi-VN') + ' đ';
+        const nft = document.getElementById('newFlightTotal');
+        if (nft) nft.innerText = fmt(newPrice);
+        const scf = document.getElementById('seatClassFee');
+        if (scf) scf.innerText = fmt(seatFee * pax);
+        const ept = document.getElementById('exchangePayTotal');
+        if (ept) ept.innerText = fmt(Math.abs(diff));
+        const lbl = document.getElementById('exchangeSettlementLabel');
+        if (lbl) lbl.innerText = diff < 0 ? 'Số tiền hoàn lại' : 'Số tiền cần thanh toán thêm';
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    (function () {
+        var optionsEl = document.getElementById('exchangeOptionsData');
+        if (!optionsEl) return;
+        var exchangeOptions = JSON.parse(optionsEl.textContent || '[]');
+        var canProc = @(canProc ? "true" : "false");
+        var picker = document.getElementById('exchangeDatePicker');
+        if (!picker) return;
+
+        picker.addEventListener('change', function () {
+            var selectedDate = this.value;
+            var flights = exchangeOptions.filter(function (o) { return o.dateKey === selectedDate; });
+            var container = document.getElementById('exchangeFlightsForDate');
+            if (!container) return;
+            if (flights.length === 0) {
+                container.innerHTML = '<div style="padding:10px;background:#f5f7fb;border:1px solid #d6e2f1;border-radius:6px;text-align:center;color:#5f6d82;font-size:13px;">Không có chuyến bay vào ngày này. Vui lòng chọn ngày khác.</div>';
+                return;
+            }
+            container.innerHTML = flights.map(function (f) {
+                var dis = canProc ? '' : 'disabled';
+                return '<label class="flight-radio">'
+                    + '<input type="radio" name="selectedFlightKey" value="' + escHtml(f.key) + '" data-price="' + f.price + '" onchange="updateExchangePrice(this)" ' + dis + ' />'
+                    + '<div class="flight-radio-content">'
+                    + '<div class="flight-rc-info">' + escHtml(f.flightNumber) + '<small>' + escHtml(f.airline) + '</small></div>'
+                    + '<div class="flight-rc-times">' + escHtml(f.departureText) + ' → ' + escHtml(f.arrivalText) + '</div>'
+                    + '<div class="flight-rc-price">' + escHtml(f.priceText) + '</div>'
+                    + '</div></label>';
+            }).join('');
+        });
+    })();
+
+    renderPaxRows();
+
+    (function () {
+        const toast = document.getElementById('successToast');
+        if (toast) {
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 5000);
+        }
+    })();
+</script>
 }

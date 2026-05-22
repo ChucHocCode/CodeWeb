@@ -1,0 +1,251 @@
+@model WNCAirline.Controllers.PaymentQrViewModel
+
+@{
+    ViewData["Title"] = Model.IsPayoutToUser ? "Hoàn Tiền QR" : "Quét QR Thanh Toán";
+}
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .qr-page { min-height: calc(100vh - 110px); padding: 16px 0 32px; }
+    .qr-container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    .qr-container h1 { margin: 0 0 14px; font-size: 26px; font-weight: 800; color: #1a2a42; }
+    .qr-info-card { background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+    .qr-info-card h2 { margin: 0 0 12px; font-size: 18px; }
+    .qr-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f8; font-size: 13px; }
+    .qr-info-row:last-child { border-bottom: 0; }
+    .qr-info-row span { color: #64748b; }
+    .qr-info-row strong { color: #1f2937; }
+
+    .qr-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .qr-left, .qr-right, .result-card {
+        background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 16px;
+    }
+    .qr-left h3, .qr-right h3 { margin: 0 0 12px; font-size: 16px; }
+    .qr-box {
+        border: 1px dashed #ccd6e6; border-radius: 10px;
+        min-height: 200px; display: flex; align-items: center; justify-content: center;
+        color: #7b879a; font-weight: 700; padding: 10px;
+    }
+    .qr-image { width: 180px; height: 180px; object-fit: contain; display: block; margin: 0 auto; }
+    .link-box {
+        margin-top: 10px; height: 40px; border: 1px solid #d7dfeb; border-radius: 7px;
+        display: flex; align-items: center; padding: 0 10px; color: #4d5a6f; font-size: 12px; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap;
+    }
+    .qr-status-text { margin-top: 12px; text-align: center; font-size: 13px; min-height: 26px; display: flex; align-items: center; justify-content: center; }
+    .qr-waiting { display: flex; align-items: center; gap: 7px; color: #4e5a6f; }
+    .qr-approved { display: flex; align-items: center; gap: 7px; color: #15803d; font-weight: 700; }
+    .qr-spinner {
+        display: inline-block; width: 14px; height: 14px;
+        border: 2px solid #d0d9e6; border-top-color: #2a66b8;
+        border-radius: 50%; animation: qr-spin 0.75s linear infinite; flex-shrink: 0;
+    }
+    @@keyframes qr-spin { to { transform: rotate(360deg); } }
+
+    .result-card h2 { margin: 0; font-size: 20px; }
+    .result-card p { margin: 6px 0 0; color: #64748b; font-size: 13px; }
+    .result-card.success { background: #effcf4; border-color: #b9ebc9; }
+    .result-card.failed  { background: #fff8e4; border-color: #f0d895; }
+    .result-icon { text-align: center; margin-bottom: 14px; }
+    .success-tick, .failed-icon {
+        width: 68px; height: 68px; border-radius: 50%; color: #fff;
+        font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto;
+    }
+    .success-tick { background: #16a34a; animation: result-pop .45s cubic-bezier(.175,.885,.32,1.275); }
+    .failed-icon  { background: #dc2626; }
+    @@keyframes result-pop { 0%{transform:scale(0);opacity:0} 75%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+    .result-block { margin-top: 10px; }
+    .result-block h3 { margin: 0 0 5px; font-size: 13px; color: #516077; }
+    .result-chip { background: #fff; border: 1px solid #dde6f2; border-radius: 7px; padding: 10px; font-size: 13px; }
+    .result-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .btn-primary { flex: 1; height: 40px; border-radius: 8px; border: 0; background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .btn-primary:hover { background: #1f4f95; }
+    .btn-secondary { flex: 1; height: 40px; border-radius: 8px; border: 1px solid #d6dfeb; background: #fff; color: #445064; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .countdown-text { font-size: 13px; color: #64748b; text-align: center; margin-top: 8px; }
+    .countdown-text.urgent { color: #dc2626; font-weight: 700; }
+    @@media (max-width: 900px) { .qr-layout { grid-template-columns: 1fr; } }
+</style>
+
+<div class="qr-page">
+<div class="qr-container">
+    <h1>@(Model.IsPayoutToUser ? "Xác nhận hoàn tiền" : "Quét mã QR để thanh toán")</h1>
+
+    <div class="qr-info-card">
+        <h2>Thông tin đặt chỗ</h2>
+        <div class="qr-info-row"><span>Mã PNR</span><strong>@Model.PNR</strong></div>
+        <div class="qr-info-row"><span>Hành trình</span><strong>@Model.Route</strong></div>
+        <div class="qr-info-row"><span>Ngày bay</span><strong>@Model.FlightDate</strong></div>
+        <div class="qr-info-row"><span>@Model.AmountLabel</span><strong style="color:#2a66b8;font-size:15px;">@Model.Total</strong></div>
+        <div class="qr-info-row"><span>Hết hạn</span><strong>@Model.ExpiresAt</strong></div>
+    </div>
+
+    <div id="qr-active-section">
+        <div class="qr-layout">
+            <div class="qr-left">
+                <h3>Mã QR thanh toán</h3>
+                <div class="qr-box">
+                    <img id="qrImage" src="@Model.QrImageDataUrl" alt="QR Code" class="qr-image" />
+                </div>
+                <div class="qr-status-text">
+                    <div class="qr-waiting" id="statusWaiting">
+                        <span class="qr-spinner"></span>
+                        Đang chờ xác nhận thanh toán...
+                    </div>
+                    <div class="qr-approved" id="statusApproved" style="display:none">
+                        ✓ Thanh toán đã được xác nhận!
+                    </div>
+                </div>
+                <div class="countdown-text" id="countdown"></div>
+            </div>
+
+            <div class="qr-right">
+                <h3>Quét bằng điện thoại</h3>
+                <p style="font-size:13px;color:#4d5a6f;margin:0 0 12px;">
+                    @(Model.IsPayoutToUser
+                        ? "Dùng điện thoại quét mã QR để mở trang xác nhận hoàn tiền. Nhập thông tin tài khoản, sau đó nhấn Đồng ý."
+                        : "Mở ứng dụng ngân hàng hỗ trợ VNPAY, chọn Quét QR và quét mã bên cạnh để thanh toán nhanh.")
+                </p>
+                <div class="link-box">
+                    <span style="color:#2a66b8;font-weight:700;margin-right:6px;">🔗</span>
+                    <span id="mobileLinkText">@Model.MobileScanUrl</span>
+                </div>
+                <p style="font-size:12px;color:#778398;margin-top:8px;">
+                    Hoặc truy cập link trực tiếp trên trình duyệt điện thoại.
+                </p>
+
+                <div style="margin-top:16px;padding:12px;background:#f8fbff;border:1px solid #d6e2f1;border-radius:8px;">
+                    <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#3f4a5e;">Hướng dẫn thanh toán</p>
+                    <ol style="margin:0;padding-left:16px;font-size:12px;color:#4d5a6f;line-height:1.8;">
+                        <li>Mở app ngân hàng trên điện thoại</li>
+                        <li>Chọn "Quét QR" hoặc "Thanh toán QR"</li>
+                        <li>Quét mã QR bên trái</li>
+                        <li>Xác nhận số tiền và hoàn tất</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-section" style="display:none">
+        <div class="result-card success" id="successCard" style="display:none">
+            <div class="result-icon"><div class="success-tick">✓</div></div>
+            <h2>@(Model.IsPayoutToUser ? "Hoàn tiền thành công!" : "Thanh toán thành công!")</h2>
+            <p>Giao dịch đã được xác nhận. Vé điện tử sẽ được gửi qua email.</p>
+            <div class="result-block">
+                <h3>Thông tin giao dịch</h3>
+                <div class="result-chip">
+                    PNR: <strong>@Model.PNR</strong> · Số tiền: <strong>@Model.Total</strong>
+                </div>
+            </div>
+            <div class="result-actions">
+                <a class="btn-primary" href="@Url.Action("Index","TicketStatus")">Xem trạng thái vé</a>
+                <a class="btn-secondary" href="@Url.Action("Index","Home")">Về trang chủ</a>
+            </div>
+        </div>
+
+        <div class="result-card failed" id="failedCard" style="display:none">
+            <div class="result-icon"><div class="failed-icon">✕</div></div>
+            <h2>Thanh toán thất bại</h2>
+            <p id="failedReason">Giao dịch không thành công hoặc đã hết thời gian. Vui lòng thử lại.</p>
+            <div class="result-actions">
+                <a class="btn-primary" href="@Url.Action("Index","Payment")">Thử lại</a>
+                <a class="btn-secondary" href="@Url.Action("Index","Home")">Về trang chủ</a>
+            </div>
+        </div>
+
+        <div class="result-card failed" id="expiredCard" style="display:none">
+            <div class="result-icon">
+                <div class="failed-icon" style="background:#d97706;font-size:30px;">⏱</div>
+            </div>
+            <h2>Phiên thanh toán hết hạn</h2>
+            <p>Mã QR chỉ có hiệu lực trong 10 phút. Vui lòng tải lại mã QR mới để tiếp tục thanh toán.</p>
+            <div class="result-block">
+                <div class="result-chip">PNR: <strong>@Model.PNR</strong> · Số tiền: <strong>@Model.Total</strong></div>
+            </div>
+            <div class="result-actions">
+                <button class="btn-primary" onclick="window.location.reload()">Tải lại QR mới</button>
+                <a class="btn-secondary" href="@Url.Action("Index","Payment")">Về thanh toán</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    window.paymentQrConfig = {
+        sessionId: "@Model.SessionId",
+        statusPollUrl: "@Model.StatusPollUrl",
+        expiresAt: "@Model.ExpiresAt"
+    };
+</script>
+
+@section Scripts {
+<script>
+    (function () {
+        var cfg = window.paymentQrConfig || {};
+        if (!cfg.sessionId || !cfg.statusPollUrl) return;
+
+        var pollTimer;
+        var countdownTimer;
+        var expiresMs;
+
+        try {
+            var parts = (cfg.expiresAt || '').match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
+            if (parts) {
+                expiresMs = new Date(parts[3], parts[2]-1, parts[1], parts[4], parts[5]).getTime();
+            }
+        } catch(e) {}
+
+        function showResult(status) {
+            clearInterval(pollTimer);
+            clearInterval(countdownTimer);
+            if (status === 'SUCCESS') {
+                document.getElementById('statusApproved').style.display = 'flex';
+                document.getElementById('statusWaiting').style.display = 'none';
+                window.location.href = '/Payment/Success?pnr=' + encodeURIComponent('@Model.PNR') +
+                    '&email=' + encodeURIComponent('@Model.Email');
+                return;
+            }
+            document.getElementById('qr-active-section').style.display = 'none';
+            document.getElementById('result-section').style.display = '';
+            if (status === 'expired') {
+                document.getElementById('expiredCard').style.display = '';
+            } else {
+                document.getElementById('failedCard').style.display = '';
+            }
+        }
+
+        function poll() {
+            fetch(cfg.statusPollUrl)
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.status === 'SUCCESS') { showResult('SUCCESS'); }
+                    else if (d.status === 'FAILED') { showResult('FAILED'); }
+                    else if (d.status === 'expired') { showResult('expired'); }
+                })
+                .catch(function() {});
+        }
+
+        function updateCountdown() {
+            if (!expiresMs) return;
+            var remaining = Math.floor((expiresMs - Date.now()) / 1000);
+            var el = document.getElementById('countdown');
+            if (remaining <= 0) {
+                el.innerText = 'Phiên đã hết hạn';
+                el.className = 'countdown-text urgent';
+                showResult('expired');
+                return;
+            }
+            var m = Math.floor(remaining / 60);
+            var s = remaining % 60;
+            el.innerText = 'Hết hạn sau ' + m + ':' + (s < 10 ? '0' : '') + s;
+            el.className = 'countdown-text' + (remaining < 60 ? ' urgent' : '');
+        }
+
+        poll();
+        pollTimer = setInterval(poll, 2500);
+        updateCountdown();
+        countdownTimer = setInterval(updateCountdown, 1000);
+    })();
+</script>
+}

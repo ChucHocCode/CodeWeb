@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WNC.Airline")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d36b616579fc4db6eab39a9d20f7e493f4e64055")]
 [assembly: System.Reflection.AssemblyProductAttribute("WNC.Airline")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WNC.Airline")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

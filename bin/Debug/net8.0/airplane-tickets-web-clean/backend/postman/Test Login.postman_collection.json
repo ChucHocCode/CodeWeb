@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "2411905d-2fe4-4bb7-b436-c9393fdce81a",
+    "name": "Test Login",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50859573",
+    "_collection_link": "https://go.postman.co/collection/50859573-2411905d-2fe4-4bb7-b436-c9393fdce81a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "testlogin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(pm.iterationData.get(\"scenario\"), function () {\r",
+              "    var expectedCode = pm.iterationData.get(\"expected_http_code\");\r",
+              "    pm.response.to.have.status(expectedCode);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{user_email}}\",\r\n  \"password\": \"{{user_password}}\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "pm.test(\"Kiểm tra đăng nhập thành công\", function () {\r",
+          "    pm.response.to.have.status(200); // Mong đợi code trả về là 200\r",
+          "});\r",
+          "\r",
+          "pm.test(\"Dữ liệu trả về có chứa Token\", function () {\r",
+          "    var jsonData = pm.response.json();\r",
+          "    pm.expect(jsonData.token).to.not.be.undefined;\r",
+          "});\r",
+          ""
+        ]
+      }
+    }
+  ]
+}

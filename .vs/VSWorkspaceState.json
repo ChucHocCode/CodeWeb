@@ -1,15 +1,15 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Controllers",
     "\\db",
+    "\\Migrations",
     "\\Models",
     "\\modules",
     "\\modules\\hoan-doi",
     "\\modules\\thanh-toan",
     "\\modules\\trang-thai",
-    "\\obj",
-    "\\wwwroot",
-    "\\wwwroot\\js"
+    "\\Properties"
   ],
   "PreviewInSolutionExplorer": false
 }

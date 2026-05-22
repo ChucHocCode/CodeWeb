@@ -1,0 +1,768 @@
+@model WNCAirline.Models.Flight
+
+@{
+    ViewData["Title"] = "Đặt Vé & Giữ Chỗ";
+    int paxCount    = ViewBag.PassengerCount ?? 1;
+    int adultCount  = ViewBag.AdultCount  ?? paxCount;
+    int childCount  = ViewBag.ChildCount  ?? 0;
+    int infantCount = ViewBag.InfantCount ?? 0;
+    var occupiedSeats = (ViewBag.OccupiedSeats as IReadOnlyCollection<string>) ?? Array.Empty<string>();
+
+    string PaxTypeLabel(int idx) {
+        if (idx <= adultCount) return "Người lớn (ADT)";
+        if (idx <= adultCount + childCount) return "Trẻ em (CHD)";
+        return "Em bé (INF)";
+    }
+}
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    .booking-page { min-height: calc(100vh - 110px); background: #f3f5f8; padding-bottom: 18px; }
+    .booking-steps {
+        background: #fff; border: 1px solid #dde6f1; border-radius: 12px;
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 16px 14px; margin-bottom: 14px;
+    }
+    .step {
+        position: relative; display: flex; flex-direction: column;
+        align-items: center; gap: 10px; text-align: center; color: #7b8798;
+    }
+    .step::after {
+        content: ""; position: absolute; top: 18px;
+        left: calc(50% + 24px); right: -50%; height: 2px; background: #d6deea;
+    }
+    .step:last-child::after { display: none; }
+    .step span {
+        width: 38px; height: 38px; border-radius: 999px; background: #e8edf7;
+        display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;
+    }
+    .step.active span { background: #2a66b8; color: #fff; }
+    .step strong { font-size: 14px; }
+    .booking-layout { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 16px; align-items: start; }
+    .booking-form-pane { display: grid; gap: 14px; }
+    .trip-summary-card {
+        background: #fff; border: 1px solid #d8e0eb; border-radius: 14px; padding: 14px 16px; display: grid; gap: 12px;
+    }
+    .trip-summary-top { display: flex; align-items: center; gap: 12px; }
+    .trip-summary-badge {
+        background: #d5f0c7; color: #14532d; border: 1px solid #b8e2a3;
+        border-radius: 10px; padding: 6px 12px; font-size: 14px; font-weight: 800; white-space: nowrap;
+    }
+    .trip-summary-city { margin: 0; color: #596273; font-size: 15px; font-weight: 700; }
+    .trip-summary-main { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 16px; }
+    .trip-summary-airline { font-size: 14px; font-weight: 800; color: #c81e1e; text-align: center; }
+    .trip-summary-content h3 { margin: 0; font-size: 14px; font-weight: 700; color: #111827; line-height: 1.4; }
+    .trip-summary-content p { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: #111827; }
+    .panel { background: #fff; border: 1px solid #dce4ef; border-radius: 12px; padding: 18px; }
+    .panel h2 { margin: 0 0 4px; font-size: 22px; font-weight: 800; color: #1a3761; }
+    .panel-note { margin: 6px 0 14px; color: #6c7789; font-size: 13px; }
+    .form-grid { display: grid; gap: 12px; }
+    .form-grid.two { grid-template-columns: 1fr 1fr; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 13px; font-weight: 700; color: #3f4a5e; }
+    .field input, .field select {
+        height: 42px; border: 1px solid #d9e2ee; border-radius: 8px;
+        background: #fff; padding: 0 12px; font-size: 14px; font-family: inherit;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: #2a66b8; }
+    .warning-box { background: #fff9db; border: 1px solid #f2e6a7; color: #7a5b00; border-radius: 8px; padding: 12px; font-size: 13px; margin-top: 10px; }
+    .error-message { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 7px; padding: 10px; font-size: 13px; display: none; margin-top: 10px; }
+    .passenger-nav-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .passenger-nav-btn {
+        border: 1px solid #ccdaee; border-radius: 999px; background: #f8fbff;
+        color: #29527f; height: 32px; padding: 0 12px; cursor: pointer; font-weight: 700; font-family: inherit;
+    }
+    .passenger-nav-btn.active { background: #2a66b8; border-color: #2a66b8; color: #fff; }
+    .passenger-sequence-card { border: 1px solid #cfddf0; background: #edf4ff; border-radius: 10px; padding: 14px; }
+    .passenger-sequence-card h3 { margin: 0 0 14px; font-size: 18px; }
+    .passenger-sequence-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .seat-option-list { display: grid; gap: 8px; }
+    .seat-option {
+        border: 1px solid #d7e2f1; border-radius: 8px; padding: 10px;
+        display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start;
+        cursor: pointer; background: #fbfdff;
+    }
+    .seat-option.checked { border-color: #2a66b8; background: #eef5ff; }
+    .seat-option input { margin-top: 2px; }
+    .seat-option div { display: grid; gap: 3px; }
+    .seat-option strong { font-size: 13px; color: #1f2937; }
+    .seat-option small { color: #5b6880; font-size: 12px; }
+    .seat-picker-card { border: 1px solid #d4e2f4; border-radius: 10px; background: #f7fbff; padding: 12px; display: grid; gap: 10px; margin-top: 12px; }
+    .seat-picker-head h3 { margin: 0; font-size: 16px; }
+    .seat-picker-head p { margin: 4px 0 0; color: #556276; font-size: 12px; }
+    .seat-picker-legend { display: flex; flex-wrap: wrap; gap: 8px; }
+    .legend-chip { border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; border: 1px solid transparent; }
+    .legend-chip.standard { background: #e5f1ff; color: #145ba5; }
+    .legend-chip.flex { background: #e9fff4; color: #0f6b45; }
+    .legend-chip.priority { background: #fff2df; color: #985e10; }
+    .legend-chip.selected { background: #2a66b8; color: #fff; }
+    .legend-chip.occupied { background: #ebedf1; color: #5a6578; }
+    .seat-map-cabin { border: 1px solid #d8e4f4; border-radius: 8px; background: #fff; padding: 10px; display: grid; gap: 6px; }
+    .seat-map-row {
+        display: grid; gap: 6px; align-items: center;
+        grid-template-columns: 30px repeat(3,minmax(0,1fr)) 24px repeat(3,minmax(0,1fr));
+    }
+    .seat-row-label { font-size: 11px; color: #4f5d73; font-weight: 700; text-align: center; }
+    .seat-map-aisle { height: 100%; border-left: 1px dashed #c7d4e7; border-right: 1px dashed #c7d4e7; }
+    .seat-map-cell {
+        height: 30px; border-radius: 6px; border: 1px solid #b7c7de;
+        font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: transform .15s, background .15s;
+    }
+    @@keyframes seat-pop { 0%{transform:scale(1)} 40%{transform:scale(1.25)} 100%{transform:scale(1)} }
+    .seat-map-cell.just-selected { animation: seat-pop .25s ease; }
+    .seat-map-cell.standard.available { background: #ebf4ff; color: #1f4f86; }
+    .seat-map-cell.flex.available { background: #ecfff4; color: #146746; }
+    .seat-map-cell.priority.available { background: #fff5e6; color: #8f5f1f; }
+    .seat-map-cell.selected { background: #2a66b8; color: #fff; border-color: #2a66b8; }
+    .seat-map-cell.occupied { background: #edf0f4; color: #9aa6b8; border-color: #d4dbe6; cursor: not-allowed; }
+    .seat-picker-note { margin: 0; font-size: 12px; color: #425167; }
+    .confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .confirm-block { border: 1px solid #dbe5f2; border-radius: 8px; padding: 12px; background: #fbfdff; }
+    .confirm-block h3 { margin: 0 0 8px; font-size: 17px; }
+    .confirm-block p { margin: 0 0 5px; font-size: 14px; color: #334155; }
+    .confirm-block small { color: #64748b; font-size: 12px; }
+    .price-breakdown { border: 1px solid #dbe5f2; border-radius: 8px; padding: 12px; background: #f8fbff; display: grid; gap: 8px; margin-top: 12px; }
+    .price-breakdown div { display: flex; justify-content: space-between; gap: 12px; color: #334155; font-size: 14px; }
+    .price-breakdown .final { border-top: 1px solid #dbe5f2; padding-top: 8px; font-weight: 700; font-size: 16px; }
+    .promo-inline-row { display: grid; grid-template-columns: 1fr 130px; gap: 8px; margin-top: 10px; }
+    .promo-inline-row input {
+        height: 38px; border: 1px solid #cfdcee; border-radius: 7px; padding: 0 10px; font-size: 14px; font-family: inherit;
+    }
+    .form-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn-cancel {
+        flex: 1; height: 44px; border-radius: 8px; border: 1px solid #d6dfeb;
+        background: #e4e9f2; color: #344256; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-confirm {
+        flex: 1; height: 44px; border-radius: 8px; border: 0;
+        background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-confirm:hover { background: #1f4f95; }
+    .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+    .booking-summary-card { position: sticky; top: 120px; background: #fff; border: 1px solid #d6e2f1; border-radius: 10px; padding: 14px; }
+    .booking-summary-card h3 { margin: 0 0 10px; font-size: 18px; }
+    .summary-flight { border-bottom: 1px solid #edf2f8; padding-bottom: 10px; margin-bottom: 10px; }
+    .summary-flight strong { display: block; font-size: 14px; }
+    .summary-flight span { color: #778398; font-size: 12px; }
+    .summary-times { display: flex; justify-content: space-between; margin-top: 10px; font-size: 13px; color: #334155; }
+    .summary-row, .summary-total { display: flex; justify-content: space-between; font-size: 13px; margin-top: 10px; }
+    .summary-row span { color: #64748b; }
+    .summary-total { border-top: 1px solid #edf2f8; padding-top: 10px; margin-top: 12px; font-size: 15px; font-weight: 700; }
+    .summary-total strong { color: #2a66b8; }
+    @@media (max-width: 1020px) {
+        .booking-layout { grid-template-columns: 1fr; }
+        .booking-summary-card { position: static; }
+        .confirm-grid { grid-template-columns: 1fr; }
+    }
+    @@media (max-width: 760px) {
+        .booking-steps { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+        .step::after { display: none; }
+        .form-grid.two { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="booking-page" style="padding-top:16px;">
+    <div style="max-width:1320px;margin:0 auto;padding:0 16px;">
+
+        <div class="booking-steps">
+            <div class="step active" id="step1-indicator">
+                <span>1</span><strong>Nhập thông tin</strong>
+            </div>
+            <div class="step" id="step2-indicator">
+                <span>2</span><strong>Chọn chỗ</strong>
+            </div>
+            <div class="step" id="step3-indicator">
+                <span>3</span><strong>Xác nhận</strong>
+            </div>
+            <div class="step" id="step4-indicator">
+                <span>4</span><strong>Giữ chỗ</strong>
+            </div>
+        </div>
+
+        <div class="booking-layout">
+            <div class="booking-form-pane">
+
+                <!-- STEP 1 -->
+                <div id="section-step-1">
+                    <div class="trip-summary-card">
+                        <div class="trip-summary-top">
+                            <span class="trip-summary-badge">Chuyến bay đi</span>
+                            <p class="trip-summary-city">@Model.DepartureCity → @Model.ArrivalCity · @Model.DepartureTime.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="trip-summary-main">
+                            <div class="trip-summary-airline">@Model.Airline</div>
+                            <div class="trip-summary-content">
+                                <h3>@Model.FlightNumber · @Model.DepartureTime.ToString("HH:mm") → @Model.ArrivalTime.ToString("HH:mm")</h3>
+                                <p>Bay thẳng · @Model.Duration phút · @Model.AvailableSeats chỗ trống</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top:14px;">
+                        <h2>Thông tin liên hệ</h2>
+                        <p class="panel-note">Vé điện tử sẽ gửi qua email sau khi thanh toán thành công.</p>
+                        <div id="error-message" class="error-message">Vui lòng điền đầy đủ các trường bắt buộc.</div>
+                        <div class="form-grid two">
+                            <div class="field">
+                                <label>Họ tên *</label>
+                                <input type="text" id="contact-name" placeholder="Nhập họ tên" />
+                            </div>
+                            <div class="field">
+                                <label>Email *</label>
+                                <input type="email" id="contact-email" placeholder="email@example.com" />
+                            </div>
+                            <div class="field">
+                                <label>Điện thoại *</label>
+                                <input type="text" id="contact-phone" placeholder="0912345678 hoặc +84912345678" maxlength="15" />
+                            </div>
+                            <div class="field">
+                                <label>Ngày sinh *</label>
+                                <input type="date" id="contact-dob" />
+                            </div>
+                            <div class="field">
+                                <label>Giới tính *</label>
+                                <select id="contact-gender">
+                                    <option>Nam</option><option>Nữ</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Số CCCD *</label>
+                                <input type="text" id="contact-cccd" placeholder="Nhập 12 số CCCD"
+                                       maxlength="12" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+                            </div>
+                        </div>
+                        <div class="warning-box">Vui lòng nhập tên bằng tiếng Anh không dấu, chính xác như trên giấy tờ tùy thân.</div>
+                    </div>
+
+                    <div class="panel" style="margin-top:14px;">
+                        <h2>Thông tin hành khách</h2>
+                        <p class="panel-note">Nhập đúng họ tên theo giấy tờ tùy thân.</p>
+                        <div class="passenger-nav-row">
+                            @for (int i = 1; i <= paxCount; i++)
+                            {
+                                <button type="button" id="btn-tab-@i"
+                                        class="passenger-nav-btn @(i == 1 ? "active" : "")"
+                                        onclick="switchPax(@i)">Hành khách @i — @PaxTypeLabel(i)</button>
+                            }
+                        </div>
+                        @for (int i = 1; i <= paxCount; i++)
+                        {
+                            <div id="pax-form-@i" class="pax-form-block" style="@(i == 1 ? "" : "display:none")">
+                                <div class="passenger-sequence-card">
+                                    <h3>Hành khách @i — @PaxTypeLabel(i)</h3>
+                                    <div class="form-grid two">
+                                        <div class="field">
+                                            <label>Họ tên *</label>
+                                            <input type="text" id="pax-name-@i" placeholder="HO TEN"
+                                                   style="text-transform:uppercase" />
+                                        </div>
+                                        <div class="field">
+                                            <label>Giới tính *</label>
+                                            <select><option>Nam</option><option>Nữ</option></select>
+                                        </div>
+                                        <div class="field">
+                                            <label>Ngày sinh *</label>
+                                            <input type="date" id="pax-dob-@i" />
+                                        </div>
+                                        <div class="field">
+                                            <label>Số CCCD *</label>
+                                            <input type="text" id="pax-cccd-@i" placeholder="012345678901" maxlength="12" />
+                                        </div>
+                                    </div>
+                                    <div class="passenger-sequence-actions">
+                                        @if (i > 1)
+                                        {
+                                            <button type="button" class="btn-cancel" style="max-width:180px" onclick="switchPax(@(i-1))">← Hành khách trước</button>
+                                        }
+                                        @if (i < paxCount)
+                                        {
+                                            <button type="button" class="btn-confirm" style="max-width:180px" onclick="switchPax(@(i+1))">Hành khách tiếp →</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="window.history.back()">Quay lại chọn chuyến</button>
+                        <button type="button" class="btn-confirm" onclick="showStep2()">Tiếp tục →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div id="section-step-2" style="display:none">
+                    <div class="panel">
+                        <h2>Chọn hạng ghế</h2>
+                        <p class="panel-note">Hãng: @Model.Airline · Chuyến @Model.FlightNumber</p>
+                        <div class="seat-option-list">
+                            <label class="seat-option" onclick="selectSeatType(this,'Phổ thông',0)">
+                                <input type="radio" name="seatClass" value="Phổ thông" />
+                                <div>
+                                    <strong>Phổ thông (+0 đ/khách)</strong>
+                                    <small>Ghế tiết kiệm tiêu chuẩn. Hành lý xách tay 7kg.</small>
+                                </div>
+                            </label>
+                            <label class="seat-option" onclick="selectSeatType(this,'Thương gia',90000)">
+                                <input type="radio" name="seatClass" value="Thương gia" />
+                                <div>
+                                    <strong>Thương gia (+90.000 đ/khách)</strong>
+                                    <small>Chân rộng hơn, ưu tiên thủ tục, hành lý ký gửi 20kg.</small>
+                                </div>
+                            </label>
+                            <label class="seat-option checked" onclick="selectSeatType(this,'Hạng nhất',180000)">
+                                <input type="radio" name="seatClass" value="Hạng nhất" checked />
+                                <div>
+                                    <strong>Hạng nhất (+180.000 đ/khách)</strong>
+                                    <small>Ghế rộng, gói linh hoạt, hành lý ký gửi 30kg, ưu tiên lên tàu.</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top:14px;">
+                        <h2>Chọn vị trí ghế</h2>
+                        <div class="seat-picker-card">
+                            <div class="seat-picker-head">
+                                <h3>Sơ đồ ghế — @Model.FlightNumber</h3>
+                                <p>Chọn 1 ghế cho mỗi hành khách. Ghế đã chọn sẽ hiển thị màu xanh.</p>
+                            </div>
+                            <div class="seat-picker-legend">
+                                <span class="legend-chip standard">Tiêu chuẩn</span>
+                                <span class="legend-chip flex">Linh hoạt</span>
+                                <span class="legend-chip priority">Ưu tiên</span>
+                                <span class="legend-chip selected">Đã chọn</span>
+                                <span class="legend-chip occupied">Đã có người</span>
+                            </div>
+                            <div class="seat-map-cabin">
+                                @for (int row = 1; row <= 20; row++)
+                                {
+                                    string seatClass = row <= 3 ? "priority" : (row <= 8 ? "flex" : "standard");
+                                    <div class="seat-map-row">
+                                        <div class="seat-row-label">@row</div>
+                                        @foreach (var col in new[] { "A", "B", "C" })
+                                        {
+                                            var seatId = $"{row}{col}";
+                                            var isOccupied = occupiedSeats.Contains(seatId);
+                                            var cellCss = isOccupied ? $"{seatClass} occupied" : $"{seatClass} available";
+                                            <div class="seat-map-cell @cellCss" data-seat-type="@seatClass"
+                                                 onclick="selectSeatCell(this)">@seatId</div>
+                                        }
+                                        <div class="seat-map-aisle"></div>
+                                        @foreach (var col in new[] { "D", "E", "F" })
+                                        {
+                                            var seatId = $"{row}{col}";
+                                            var isOccupied = occupiedSeats.Contains(seatId);
+                                            var cellCss = isOccupied ? $"{seatClass} occupied" : $"{seatClass} available";
+                                            <div class="seat-map-cell @cellCss" data-seat-type="@seatClass"
+                                                 onclick="selectSeatCell(this)">@seatId</div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <p class="seat-picker-note">Ghế đã chọn: <strong id="display-seat">Chưa chọn</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="showStep1()">← Quay lại</button>
+                        <button type="button" class="btn-confirm" onclick="showStep3()">Tiếp tục xác nhận →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div id="section-step-3" style="display:none">
+                    <div class="panel">
+                        <h2>Xác nhận thông tin</h2>
+                        <p class="panel-note">Kiểm tra lại trước khi giữ chỗ.</p>
+                        <div class="confirm-grid">
+                            <div class="confirm-block">
+                                <h3>Thông tin chuyến bay</h3>
+                                <p><strong>@Model.Airline</strong></p>
+                                <p>@Model.DepartureCity @Model.DepartureTime.ToString("HH:mm") → @Model.ArrivalCity @Model.ArrivalTime.ToString("HH:mm")</p>
+                                <p>Ngày: <strong>@Model.DepartureTime.ToString("dd/MM/yyyy")</strong></p>
+                                <small>Hạng ghế: <span id="confirm-seat-class">Hạng nhất</span></small><br/>
+                                <small>Vị trí: <span id="confirm-seat-number" style="color:#2a66b8">Chưa chọn</span></small>
+                            </div>
+                            <div class="confirm-block">
+                                <h3>Thông tin liên hệ</h3>
+                                <p id="confirm-contact-name" style="font-weight:700">---</p>
+                                <p id="confirm-contact-email">---</p>
+                                <p id="confirm-contact-phone">---</p>
+                            </div>
+                        </div>
+                        <div class="price-breakdown">
+                            <div id="confirm-pax-rows"></div>
+                            <div><span>Phụ phí ghế</span><span id="confirm-seat-fee">0 đ</span></div>
+                            <div><span>Thuế &amp; phí sân bay (10%)</span><span id="confirm-tax">0 đ</span></div>
+                            <div class="final"><span>Tổng cộng</span><span id="confirm-total-price" style="color:#2a66b8">0 đ</span></div>
+                        </div>
+
+                        <div class="panel" style="margin-top:14px;background:#f8fbff;">
+                            <p style="font-size:13px;margin:0 0 6px;font-weight:700;">Mã khuyến mãi</p>
+                            <div class="promo-inline-row">
+                                <input type="text" id="promoCode" placeholder="Nhập mã giảm giá" />
+                                <button type="button" class="btn-confirm" onclick="applyPromo()" style="height:38px;font-size:13px;">Áp dụng</button>
+                            </div>
+                            <small id="promo-feedback" style="display:none;margin-top:6px;color:#2a66b8;font-size:13px;"></small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="backToStep2()">← Quay lại chọn chỗ</button>
+                        <button type="button" class="btn-confirm" onclick="showStep4()">Tiếp tục giữ chỗ →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div id="section-step-4" style="display:none">
+                    <div class="panel">
+                        <h2>Giữ chỗ</h2>
+                        <p class="panel-note">Sau khi giữ chỗ, hệ thống chuyển sang trang thanh toán để hoàn tất xuất vé.</p>
+
+                        <div class="trip-summary-card" style="margin-top:10px;">
+                            <p style="margin:0;font-weight:700;font-size:15px;">@Model.Airline · @Model.FlightNumber</p>
+                            <p style="margin:0;color:#596273;font-size:14px;">@Model.DepartureCity @Model.DepartureTime.ToString("HH:mm") → @Model.ArrivalCity @Model.ArrivalTime.ToString("HH:mm") · @Model.DepartureTime.ToString("dd/MM/yyyy")</p>
+                            <p style="margin:0;font-size:14px;">Hạng ghế: <strong id="final-seat-class">Hạng nhất</strong> · Ghế: <strong id="final-seat-number">Chưa chọn</strong></p>
+                            <p style="margin:0;font-size:16px;font-weight:800;color:#2a66b8;">Tổng: <span id="final-total-price">@(Model.BasePrice.ToString("N0")) đ</span></p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="backToStep3()">← Quay lại xác nhận</button>
+                        <button type="button" class="btn-confirm" onclick="holdAndPay()">Giữ chỗ &amp; Thanh toán</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SIDEBAR -->
+            <div>
+                <div class="booking-summary-card">
+                    <h3>Chi tiết đặt chỗ</h3>
+                    <div class="summary-flight">
+                        <strong>@Model.Airline</strong>
+                        <span>@Model.FlightNumber</span>
+                        <div class="summary-times">
+                            <span>@Model.DepartureCity @Model.DepartureTime.ToString("HH:mm")</span>
+                            <span>→</span>
+                            <span>@Model.ArrivalTime.ToString("HH:mm") @Model.ArrivalCity</span>
+                        </div>
+                        <div style="margin-top:4px;font-size:11px;color:#778398;">@Model.DepartureTime.ToString("dd/MM/yyyy") · Bay thẳng</div>
+                    </div>
+                    <div class="summary-row">
+                        <span>Hạng ghế</span>
+                        <strong id="summary-seat-class">Hạng nhất</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Vị trí ghế</span>
+                        <strong id="summary-seat-number" style="color:#2a66b8">Chưa chọn</strong>
+                    </div>
+                    <div id="summary-pax-rows"></div>
+                    <div class="summary-row">
+                        <span>Phụ phí ghế</span>
+                        <strong id="summary-seat-fee">0 đ</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Thuế &amp; phí (10%)</span>
+                        <strong id="summary-tax">0 đ</strong>
+                    </div>
+                    <div class="summary-total">
+                        <span>Tổng cộng</span>
+                        <strong id="summary-total-price">0 đ</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const originalPrice  = @Model.BasePrice;
+    const adultCountVal  = @adultCount;
+    const childCountVal  = @childCount;
+    const infantCountVal = @infantCount;
+    const taxRate        = 0.1;
+    let seatExtraFee     = 180000;
+    let currentSeatClass = 'Hạng nhất';
+    let promoDiscount    = 0;
+
+    function fmt(n) { return n.toLocaleString('vi-VN') + ' đ'; }
+
+    function updatePriceSummary() {
+        const adultPrice  = Math.round(originalPrice);
+        const childPrice  = Math.round(originalPrice * 0.75);
+        const infantPrice = Math.round(originalPrice * 0.10);
+
+        let ticketTotal = 0;
+        let paxIdx = 1;
+        let paxHtml = '';
+
+        for (let i = 0; i < adultCountVal; i++, paxIdx++) {
+            ticketTotal += adultPrice;
+            paxHtml += `<div class="summary-row"><span>Khách ${paxIdx} — Người lớn</span><strong>${fmt(adultPrice)}</strong></div>`;
+        }
+        for (let i = 0; i < childCountVal; i++, paxIdx++) {
+            ticketTotal += childPrice;
+            paxHtml += `<div class="summary-row"><span>Khách ${paxIdx} — Trẻ em (75%)</span><strong>${fmt(childPrice)}</strong></div>`;
+        }
+        for (let i = 0; i < infantCountVal; i++, paxIdx++) {
+            ticketTotal += infantPrice;
+            paxHtml += `<div class="summary-row"><span>Khách ${paxIdx} — Em bé (10%)</span><strong>${fmt(infantPrice)}</strong></div>`;
+        }
+
+        // seat fee applies to adults + children only (infants sit on lap)
+        const seatApplicable = seatExtraFee * (adultCountVal + childCountVal);
+        const tax   = Math.round(ticketTotal * taxRate);
+        const total = ticketTotal + seatApplicable + tax - promoDiscount;
+
+        ['summary-pax-rows', 'confirm-pax-rows'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = paxHtml;
+        });
+
+        document.getElementById('summary-seat-fee').innerText = fmt(seatApplicable);
+        var stax = document.getElementById('summary-tax');
+        if (stax) stax.innerText = fmt(tax);
+        document.getElementById('summary-total-price').innerText = fmt(total);
+
+        var csf = document.getElementById('confirm-seat-fee');
+        if (csf) csf.innerText = fmt(seatApplicable);
+        var ctax = document.getElementById('confirm-tax');
+        if (ctax) ctax.innerText = fmt(tax);
+        var ctp = document.getElementById('confirm-total-price');
+        if (ctp) ctp.innerText = fmt(total);
+        var ftp = document.getElementById('final-total-price');
+        if (ftp) ftp.innerText = fmt(total);
+    }
+
+    function selectSeatType(el, name, extra) {
+        currentSeatClass = name;
+        seatExtraFee = extra;
+        document.querySelectorAll('.seat-option').forEach(o => o.classList.remove('checked'));
+        el.classList.add('checked');
+        document.getElementById('summary-seat-class').innerText = name;
+        const csc = document.getElementById('confirm-seat-class');
+        if (csc) csc.innerText = name;
+        const fsc = document.getElementById('final-seat-class');
+        if (fsc) fsc.innerText = name;
+        updatePriceSummary();
+    }
+
+    function selectSeatCell(el) {
+        if (el.classList.contains('occupied')) return;
+        const st = el.getAttribute('data-seat-type');
+        if (currentSeatClass === 'Phổ thông' && st !== 'standard') { alert('Hạng Phổ thông chỉ được chọn ghế Tiêu chuẩn.'); return; }
+        if (currentSeatClass === 'Thương gia' && st === 'priority') { alert('Hạng Thương gia không bao gồm ghế Ưu tiên.'); return; }
+        document.querySelectorAll('.seat-map-cell').forEach(c => c.classList.remove('selected', 'just-selected'));
+        el.classList.add('selected', 'just-selected');
+        setTimeout(() => el.classList.remove('just-selected'), 300);
+        const name = el.innerText;
+        document.getElementById('display-seat').innerText = name;
+        document.getElementById('summary-seat-number').innerText = name;
+        const csn = document.getElementById('confirm-seat-number');
+        if (csn) csn.innerText = name;
+        const fsn = document.getElementById('final-seat-number');
+        if (fsn) fsn.innerText = name;
+    }
+
+    function switchPax(n) {
+        document.querySelectorAll('.pax-form-block').forEach(f => f.style.display = 'none');
+        document.querySelectorAll('.passenger-nav-btn').forEach(b => b.classList.remove('active'));
+        const f = document.getElementById('pax-form-' + n);
+        if (f) f.style.display = '';
+        const b = document.getElementById('btn-tab-' + n);
+        if (b) b.classList.add('active');
+    }
+
+    function setStep(n) {
+        for (let i = 1; i <= 4; i++) {
+            const ind = document.getElementById('step' + i + '-indicator');
+            if (ind) ind.classList.toggle('active', i <= n);
+        }
+    }
+
+    const paxCountVal = @paxCount;
+
+    function isValidName(v) { return v.trim().length >= 2 && !/\d/.test(v); }
+    function isValidEmail(v) { return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v.trim()); }
+    function isValidPhone(v) {
+        var clean = v.replace(/[\s\-]/g, '');
+        return /^(0[3-9]\d{8})$/.test(clean) || /^(\+84[3-9]\d{8})$/.test(clean);
+    }
+    function isValidCccd(v) { return /^\d{12}$/.test(v.trim()); }
+    function isValidDob(v) {
+        if (!v) return false;
+        var d = new Date(v), now = new Date();
+        if (isNaN(d.getTime()) || d > now) return false;
+        return (now.getFullYear() - d.getFullYear()) <= 100;
+    }
+    function markField(id, valid) {
+        var el = document.getElementById(id);
+        if (el) el.style.borderColor = valid ? '' : '#fca5a5';
+        return valid;
+    }
+
+    function showStep2() {
+        const err = document.getElementById('error-message');
+        let msgs = [];
+        let ok = true;
+
+        ok &= markField('contact-name',  isValidName(document.getElementById('contact-name')?.value || ''))
+            || (msgs.push('Họ tên liên hệ không hợp lệ (chỉ chữ cái, tối thiểu 2 ký tự)'), false);
+        ok &= markField('contact-email', isValidEmail(document.getElementById('contact-email')?.value || ''))
+            || (msgs.push('Email không đúng định dạng'), false);
+        ok &= markField('contact-phone', isValidPhone(document.getElementById('contact-phone')?.value || ''))
+            || (msgs.push('Điện thoại phải đúng định dạng VN (VD: 0912345678)'), false);
+        ok &= markField('contact-dob',   isValidDob(document.getElementById('contact-dob')?.value || ''))
+            || (msgs.push('Ngày sinh không hợp lệ hoặc vượt quá 100 tuổi'), false);
+        ok &= markField('contact-cccd',  isValidCccd(document.getElementById('contact-cccd')?.value || ''))
+            || (msgs.push('Số CCCD phải đúng 12 chữ số'), false);
+
+        var allCccd = [document.getElementById('contact-cccd')?.value?.trim()];
+        for (var pi = 1; pi <= paxCountVal; pi++) {
+            var paxName  = document.getElementById('pax-name-'  + pi)?.value || '';
+            var paxDob   = document.getElementById('pax-dob-'   + pi)?.value || '';
+            var paxCccd  = document.getElementById('pax-cccd-'  + pi)?.value || '';
+            ok &= markField('pax-name-'  + pi, isValidName(paxName))
+                || (msgs.push('Tên hành khách ' + pi + ' không hợp lệ'), false);
+            ok &= markField('pax-dob-'   + pi, isValidDob(paxDob))
+                || (msgs.push('Ngày sinh hành khách ' + pi + ' không hợp lệ hoặc vượt 100 tuổi'), false);
+            ok &= markField('pax-cccd-'  + pi, isValidCccd(paxCccd))
+                || (msgs.push('Số CCCD hành khách ' + pi + ' phải đúng 12 số'), false);
+            if (isValidCccd(paxCccd)) {
+                if (allCccd.indexOf(paxCccd) !== -1) {
+                    markField('pax-cccd-' + pi, false);
+                    msgs.push('Số CCCD hành khách ' + pi + ' bị trùng — mỗi hành khách phải có CCCD khác nhau');
+                    ok = false;
+                } else {
+                    allCccd.push(paxCccd);
+                }
+            }
+        }
+
+        if (!ok) {
+            err.innerText = msgs.length > 0 ? msgs[0] : 'Vui lòng điền đầy đủ và đúng định dạng các trường bắt buộc.';
+            err.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        err.style.display = 'none';
+        document.getElementById('section-step-1').style.display = 'none';
+        document.getElementById('section-step-2').style.display = '';
+        setStep(2); window.scrollTo(0, 0);
+    }
+
+    function showStep1() {
+        document.getElementById('section-step-2').style.display = 'none';
+        document.getElementById('section-step-1').style.display = '';
+        setStep(1); window.scrollTo(0,0);
+    }
+
+    function showStep3() {
+        const name  = document.getElementById('contact-name').value;
+        const email = document.getElementById('contact-email').value;
+        const phone = document.getElementById('contact-phone').value;
+        document.getElementById('confirm-contact-name').innerText  = name.toUpperCase() || 'CHƯA NHẬP';
+        document.getElementById('confirm-contact-email').innerText = email || 'Chưa nhập';
+        document.getElementById('confirm-contact-phone').innerText = phone || 'Chưa nhập';
+        document.getElementById('confirm-seat-class').innerText = currentSeatClass;
+        const sel = document.querySelector('.seat-map-cell.selected');
+        document.getElementById('confirm-seat-number').innerText = sel ? sel.innerText : 'Chưa chọn';
+        updatePriceSummary();
+        document.getElementById('section-step-2').style.display = 'none';
+        document.getElementById('section-step-3').style.display = '';
+        setStep(3); window.scrollTo(0,0);
+    }
+
+    function backToStep2() {
+        document.getElementById('section-step-3').style.display = 'none';
+        document.getElementById('section-step-2').style.display = '';
+        setStep(2); window.scrollTo(0,0);
+    }
+
+    function showStep4() {
+        document.getElementById('final-seat-class').innerText = currentSeatClass;
+        const sel = document.querySelector('.seat-map-cell.selected');
+        document.getElementById('final-seat-number').innerText = sel ? sel.innerText : 'Chưa chọn';
+        updatePriceSummary();
+        document.getElementById('section-step-3').style.display = 'none';
+        document.getElementById('section-step-4').style.display = '';
+        setStep(4); window.scrollTo(0,0);
+    }
+
+    function backToStep3() {
+        document.getElementById('section-step-4').style.display = 'none';
+        document.getElementById('section-step-3').style.display = '';
+        setStep(3); window.scrollTo(0,0);
+    }
+
+    const PROMOS = {
+        'SKYSPRING25': { percent: 25, max: 700000, label: 'Giảm 25% (tối đa 700.000 đ)' },
+        'EARLYSAVE20': { percent: 20, max: 500000, label: 'Giảm 20% (tối đa 500.000 đ)' },
+        'FAMILY3PLUS1': { percent: 0, max: 0, label: 'Ưu đãi gia đình (áp dụng khi mua 3 vé)' }
+    };
+
+    function applyPromo() {
+        const code = document.getElementById('promoCode').value.trim().toUpperCase();
+        const fb = document.getElementById('promo-feedback');
+        if (!code) { fb.style.display = 'none'; return; }
+        const p = PROMOS[code];
+        if (!p) {
+            fb.style.display = 'block'; fb.style.color = '#dc2626';
+            fb.innerText = 'Mã không hợp lệ hoặc đã hết hạn.'; promoDiscount = 0;
+        } else if (p.percent === 0) {
+            fb.style.display = 'block'; fb.style.color = '#2a66b8';
+            fb.innerText = p.label + ' — liên hệ bộ phận hỗ trợ để xác nhận.'; promoDiscount = 0;
+        } else {
+            const disc = Math.min(Math.round(originalPrice * p.percent / 100), p.max);
+            promoDiscount = disc;
+            fb.style.display = 'block'; fb.style.color = '#16a34a';
+            fb.innerText = p.label + ' — Tiết kiệm: ' + fmt(disc);
+        }
+        updatePriceSummary();
+    }
+
+    function holdAndPay() {
+        const name  = document.getElementById('contact-name')?.value?.trim()  || '';
+        const email = document.getElementById('contact-email')?.value?.trim() || '';
+        const phone = document.getElementById('contact-phone')?.value?.trim() || '';
+        const sel   = document.querySelector('.seat-map-cell.selected');
+        const seat  = sel ? sel.innerText : 'N/A';
+
+        if (!email) { alert('Vui lòng nhập email liên hệ.'); return; }
+
+        sessionStorage.setItem('booking_contact', JSON.stringify({ name, email, phone }));
+        sessionStorage.setItem('booking_seat', seat);
+        sessionStorage.setItem('booking_class', currentSeatClass);
+        sessionStorage.setItem('booking_flight_id', '@Model.Id');
+
+        fetch('/Home/HoldBooking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ flightId: '@Model.Id', name, email, phone, seat })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) {
+                window.location.href = '/Payment/FromTicket?code=' + encodeURIComponent(d.pnr);
+            } else {
+                alert(d.message || 'Không thể tạo đặt chỗ. Vui lòng thử lại.');
+            }
+        })
+        .catch(function() {
+            window.location.href = '/Payment/Index';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const dob = document.getElementById('contact-dob');
+        if (dob) dob.setAttribute('max', today);
+        document.querySelectorAll('[id^="pax-dob-"]').forEach(i => i.setAttribute('max', today));
+        updatePriceSummary();
+    });
+</script>
+}

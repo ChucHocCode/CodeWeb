@@ -1,17 +1,431 @@
+@model WNCAirline.Models.FlightSearchModel
+@using WNCAirline.Models
+
 @{
-    ViewData["Title"] = "Trang chu";
+    ViewData["Title"] = "Trang Chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cityName = new Dictionary<string, string>
+    {
+        ["HAN"] = "Hà Nội",
+        ["SGN"] = "TP. Hồ Chí Minh",
+        ["DAD"] = "Đà Nẵng",
+        ["PQC"] = "Phú Quốc",
+        ["CXR"] = "Nha Trang"
+    };
+    string CityLabel(string code) => cityName.TryGetValue(code, out var n) ? n : code;
+
+    var todayFlights = ViewBag.TodayFlights as List<Flight> ?? new List<Flight>();
+
+    // Popular routes với tag tĩnh, giá từ DB
+    var allDest = ViewBag.Destinations as List<Flight> ?? new List<Flight>();
+    Flight? DestPrice(string from, string to) =>
+        allDest.FirstOrDefault(f => f.DepartureCity == from && f.ArrivalCity == to);
+
+    var popularRoutes = new[]
+    {
+        new { From = "HAN", To = "SGN", City = "Sài Gòn",   Tag = "Phổ biến nhất",      Code = "HAN → SGN" },
+        new { From = "SGN", To = "DAD", City = "Đà Nẵng",   Tag = "Ưu đãi cuối tuần",   Code = "SGN → DAD" },
+        new { From = "HAN", To = "PQC", City = "Phú Quốc",  Tag = "Biển mùa hè",         Code = "HAN → PQC" },
+        new { From = "SGN", To = "CXR", City = "Nha Trang",  Tag = "Đặt sớm giá tốt",    Code = "SGN → CXR" },
+    };
+
+    var promotions = new[]
+    {
+        new { Title = "Khuyến mãi Hè 2026", Desc = "Giảm 25% cho các chuyến bay nội địa trong mùa hè.", Code = "SKYSPRING25", Label = "Giảm 25% · tối đa 700.000đ" },
+        new { Title = "Ưu đãi Gia đình",    Desc = "Mua 3 vé tặng 1 vé cho chuyến bay gia đình.",      Code = "FAMILY3PLUS1", Label = "Tặng 1 vé khi mua 3 vé" },
+        new { Title = "Bay sớm - Giá tốt",  Desc = "Đặt trước 30 ngày, tiết kiệm đến 20% giá vé.",    Code = "EARLYSAVE20",  Label = "Giảm 20% · tối đa 500.000đ" },
+    };
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/home.css" asp-append-version="true" />
-}
+<style>
+    /* ===== LAYOUT ===== */
+    .home-page { display: grid; gap: 22px; padding: 20px 0; }
 
-<section class="card">
-    <h2>He thong ban ve may bay</h2>
-    <p class="hero-note">Quan ly tim chuyen bay, thanh toan, tra cuu trang thai va xu ly hoan/doi ve.</p>
-    <div class="actions" style="margin-top:10px; justify-content:flex-start;">
-        <a class="btn-link" href="@Url.Action("Index", "Payment")">Di den Thanh toan</a>
-        <a class="btn-link" href="@Url.Action("Index", "TicketStatus")">Di den Trang thai ve</a>
-        <a class="btn-link" href="@Url.Action("Index", "RefundExchange")">Di den Hoan / Doi ve</a>
+    /* ===== HERO ===== */
+    .hero-intro {
+        border: 1px solid #d3e1f5;
+        border-radius: 16px;
+        padding: 24px;
+        background:
+            radial-gradient(circle at 83% 18%, #ffffff80 0%, #ffffff00 38%),
+            linear-gradient(120deg, #0e5fb6 0%, #2b74c3 48%, #4e95df 100%);
+        color: #fff;
+        box-shadow: 0 12px 28px rgba(21,61,112,.2);
+        display: grid;
+        grid-template-columns: 1.25fr 0.95fr;
+        gap: 18px;
+    }
+    .hero-copy { display: grid; gap: 10px; }
+    .hero-kicker { margin: 0; font-size: 12px; letter-spacing: .14em; font-weight: 700; opacity: .9; }
+    .hero-copy h1 { margin: 0; font-size: clamp(26px,4.2vw,42px); line-height: 1.12; }
+    .hero-copy > p { margin: 0; color: #f2f7ff; font-size: 15px; }
+    .hero-actions { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .hero-btn { border: 0; border-radius: 999px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .hero-btn.primary { background: #fff; color: #1a4f93; }
+    .hero-btn.ghost { border: 1px solid #cfe3ff; background: #ffffff1a; color: #fff; }
+
+    .hero-highlight { border: 1px solid #ffffff3d; border-radius: 12px; padding: 14px; background: #ffffff14; }
+    .hero-highlight h3 { margin: 0 0 10px; font-size: 18px; }
+    .hero-upcoming-flights-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .hero-flight-card {
+        border-radius: 10px; border: 1px solid #ffffff30; background: #ffffff10;
+        padding: 10px; display: grid; gap: 2px; cursor: pointer;
+        transition: transform .15s ease, background .2s ease;
+    }
+    .hero-flight-card:hover { transform: translateY(-2px); background: #ffffff22; }
+    .hero-flight-card strong { font-size: 15px; color: #fff; font-weight: 700; }
+    .hero-flight-card span  { font-size: 13px; color: #fff; }
+    .hero-flight-card small { font-size: 12px; color: #dcecff; }
+
+    /* ===== SEARCH ===== */
+    .search-container {
+        background: #fff; border: 1px solid #d6e2f1;
+        border-radius: 14px; box-shadow: 0 8px 20px rgba(34,68,114,.08); padding: 18px;
+    }
+    .search-form { display: grid; gap: 14px; }
+    .trip-type { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+    .trip-type label { font-size: 14px; font-weight: 600; color: #1f2937; display: flex; gap: 7px; align-items: center; }
+    .search-inputs { display: grid; grid-template-columns: 1.25fr 1.25fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; }
+    .input-group { display: grid; gap: 5px; }
+    .input-group label { font-size: 11px; color: #525f72; font-weight: 700; text-transform: uppercase; }
+    .input-group select, .input-group input {
+        height: 42px; border: 1px solid #cfdcee; border-radius: 7px;
+        padding: 0 10px; font-size: 13px; color: #162033; background: #f5f9ff;
+    }
+    .search-btn {
+        width: 100%; height: 42px; border: 0; border-radius: 7px;
+        background: #2a66b8; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .search-btn:hover { background: #1f4f95; }
+    .search-error {
+        background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c;
+        border-radius: 7px; padding: 10px; font-size: 13px;
+    }
+
+    /* ===== POPULAR ROUTES ===== */
+    .popular-routes-section { margin-top: 6px; }
+    .popular-routes-section h2 { margin: 0 0 12px; font-size: 24px; color: #1b2c44; font-weight: 700; }
+    .routes-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .route-card {
+        border: 1px solid #d4e1f3; border-radius: 10px;
+        background: linear-gradient(170deg,#fff 0%,#f6faff 80%);
+        padding: 14px; cursor: pointer; display: grid; gap: 8px;
+        transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .route-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(32,74,127,.12); }
+    .route-card.selected { border: 2px solid #2a66b8; box-shadow: 0 6px 18px rgba(42,102,184,.2); }
+    .route-tag {
+        display: inline-block; width: fit-content; border-radius: 999px;
+        background: #e8f0ff; color: #245ca7; font-size: 11px; font-weight: 700; padding: 4px 8px;
+    }
+    .route-card h3 { margin: 0; font-size: 22px; color: #1f2f47; }
+    .route-airports { font-size: 17px; font-weight: 700; color: #213047; }
+    .route-price { color: #2a66b8; font-size: 18px; font-weight: 800; }
+
+    /* ===== PROMO ===== */
+    .promo-section h2 { margin: 0 0 12px; font-size: 24px; color: #1b2c44; font-weight: 700; }
+    .promo-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+    .promo-card { border: 1px solid #d5e2f4; border-radius: 12px; padding: 16px; background: #fff; }
+    .promo-card h3 { margin: 0; font-size: 20px; color: #234067; }
+    .promo-card p { margin: 10px 0; color: #4e5f78; line-height: 1.45; font-size: 14px; }
+    .promo-code {
+        display: inline-block; padding: 6px 10px; border-radius: 999px;
+        border: 1px dashed #6f9ed8; color: #1f4d8f; font-weight: 700; font-size: 13px;
+    }
+    .promo-meta { margin-top: 10px; color: #1f4d8f; font-size: 13px; font-weight: 700; }
+    .promo-apply-btn {
+        margin-top: 12px; width: 100%; height: 38px; border: 0; border-radius: 8px;
+        background: #2a66b8; color: #fff; font-weight: 700; cursor: pointer;
+    }
+    .promo-apply-btn:hover { background: #1f4f95; }
+    .promo-notice {
+        margin-bottom: 10px; border: 1px solid #b9dbff; border-radius: 8px;
+        background: #edf6ff; color: #1f4d8f; font-size: 13px; padding: 10px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 1100px) {
+        .hero-intro { grid-template-columns: 1fr; }
+        .search-inputs { grid-template-columns: repeat(3,1fr); }
+        .routes-grid { grid-template-columns: repeat(2,1fr); }
+        .promo-grid { grid-template-columns: 1fr; }
+    }
+    @@media (max-width: 720px) {
+        .search-inputs { grid-template-columns: 1fr; }
+        .routes-grid { grid-template-columns: 1fr; }
+        .hero-actions { flex-direction: column; }
+        .hero-btn { width: 100%; }
+    }
+</style>
+
+<div class="home-page">
+
+    <section class="hero-intro">
+        <div class="hero-copy">
+            <p class="hero-kicker">SKYBLUE AIRLINES</p>
+            <h1>Bay khắp Việt Nam với lịch trình linh hoạt và giá tốt mỗi ngày</h1>
+            <p>Hàng nghìn chuyến bay mỗi ngày, giá tốt nhất cho bạn</p>
+            <div class="hero-actions">
+                <button class="hero-btn primary" id="btn-view-all">Xem tất cả chuyến bay</button>
+                <a asp-controller="TicketStatus" asp-action="Index" class="hero-btn ghost">Theo dõi trạng thái vé</a>
+            </div>
+        </div>
+
+        <div class="hero-highlight">
+            <h3>Khởi hành trong hôm nay</h3>
+            <ul class="hero-upcoming-flights-grid">
+                @if (todayFlights.Any())
+                {
+                    foreach (var tf in todayFlights)
+                    {
+                        <li class="hero-flight-card" data-from="@tf.DepartureCity" data-to="@tf.ArrivalCity">
+                            <strong>@tf.FlightNumber</strong>
+                            <span>@CityLabel(tf.DepartureCity) → @CityLabel(tf.ArrivalCity)</span>
+                            <small>@tf.DepartureTime.ToString("HH:mm") - @tf.ArrivalTime.ToString("HH:mm") · từ @tf.BasePrice.ToString("N0")đ</small>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="hero-flight-card">
+                        <span style="opacity:.7">Không có chuyến bay hôm nay</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section class="search-container">
+        <form id="main-search-form" class="search-form">
+            <div class="trip-type">
+                <label><input type="radio" name="TripType" value="OneWay" checked id="radioOneWay" /> Một chiều</label>
+                <label><input type="radio" name="TripType" value="RoundTrip" id="radioRoundTrip" /> Khứ hồi</label>
+            </div>
+
+            <div class="search-inputs" id="search-inputs-grid">
+                <div class="input-group">
+                    <label>Từ</label>
+                    <select name="DepartureCity" id="sel-from">
+                        <option value="HAN">Hà Nội (HAN)</option>
+                        <option value="SGN">TP HCM - Sài Gòn (SGN)</option>
+                        <option value="DAD">Đà Nẵng (DAD)</option>
+                        <option value="PQC">Phú Quốc (PQC)</option>
+                        <option value="CXR">Nha Trang (CXR)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Đến</label>
+                    <select name="DestinationCity" id="sel-to">
+                        <option value="SGN" selected>TP HCM - Sài Gòn (SGN)</option>
+                        <option value="HAN">Hà Nội (HAN)</option>
+                        <option value="DAD">Đà Nẵng (DAD)</option>
+                        <option value="PQC">Phú Quốc (PQC)</option>
+                        <option value="CXR">Nha Trang (CXR)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Ngày khởi hành</label>
+                    <input type="text" id="depDate" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" />
+                    <input type="hidden" name="DepartureDate" id="depDateISO" />
+                </div>
+                <div class="input-group" id="return-date-col" style="display:none">
+                    <label>Ngày trở về</label>
+                    <input type="text" id="retDate" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" />
+                    <input type="hidden" name="ReturnDate" id="retDateISO" />
+                </div>
+                <div class="input-group">
+                    <label>Người lớn (từ 12 tuổi)</label>
+                    <select name="AdultCount">
+                        @for (int i = 1; i <= 9; i++) { <option value="@i">@i người lớn</option> }
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Trẻ em (2–11 tuổi)</label>
+                    <select name="ChildCount">
+                        @for (int i = 0; i <= 8; i++) { <option value="@i">@i trẻ em</option> }
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Em bé (dưới 2 tuổi)</label>
+                    <select name="InfantCount">
+                        @for (int i = 0; i <= 6; i++) { <option value="@i">@i em bé</option> }
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Hạng ghế</label>
+                    <select name="SeatClass">
+                        <option value="Economy">Phổ thông</option>
+                        <option value="Business">Thương gia</option>
+                        <option value="FirstClass">Hạng nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="search-error" class="search-error" style="display:none"></div>
+            <button type="submit" class="search-btn">Tìm chuyến bay</button>
+        </form>
+    </section>
+
+    <div id="homepage-body">
+
+        <section class="popular-routes-section">
+            <h2>Điểm đến nổi bật</h2>
+            <div class="routes-grid">
+                @foreach (var r in popularRoutes)
+                {
+                    var dest = DestPrice(r.From, r.To);
+                    var priceLabel = dest != null ? $"Từ {dest.BasePrice:N0}đ" : "Xem giá";
+                    <article class="route-card" data-from="@r.From" data-to="@r.To">
+                        <span class="route-tag">@r.Tag</span>
+                        <h3>@r.City</h3>
+                        <div class="route-airports">@r.Code</div>
+                        <div class="route-price">@priceLabel</div>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <section class="promo-section" style="margin-top:6px">
+            <h2>Ưu đãi dành cho bạn</h2>
+            <div id="promo-notice" class="promo-notice" style="display:none"></div>
+            <div class="promo-grid">
+                @foreach (var p in promotions)
+                {
+                    <div class="promo-card">
+                        <h3>@p.Title</h3>
+                        <p>@p.Desc</p>
+                        <div class="promo-code">Mã: @p.Code</div>
+                        <div class="promo-meta">@p.Label</div>
+                        <button type="button" class="promo-apply-btn" onclick="applyPromo('@p.Code')">Áp dụng ưu đãi</button>
+                    </div>
+                }
+            </div>
+        </section>
     </div>
-</section>
+</div>
+
+<div id="search-results-layout" style="display:none"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // ── Date helpers ──
+    var _now = new Date();
+    var todayISO = _now.getFullYear() + '-' +
+        String(_now.getMonth()+1).padStart(2,'0') + '-' +
+        String(_now.getDate()).padStart(2,'0');
+    var todayDmy = todayISO.split('-').reverse().join('/');
+
+    function dmyToIso(dmy) {
+        var p = (dmy || '').split('/');
+        if (p.length !== 3 || p[2].length !== 4) return '';
+        return p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0');
+    }
+
+    function setupDateInput(textId, isoId) {
+        $('#'+textId).on('input', function () {
+            var digits = this.value.replace(/\D/g, '').slice(0, 8);
+            var result = digits;
+            if (digits.length > 2) result = digits.slice(0,2) + '/' + digits.slice(2);
+            if (digits.length > 4) result = digits.slice(0,2) + '/' + digits.slice(2,4) + '/' + digits.slice(4);
+            this.value = result;
+            $('#'+isoId).val(digits.length === 8
+                ? digits.slice(4) + '-' + digits.slice(2,4) + '-' + digits.slice(0,2)
+                : '');
+        });
+    }
+
+    function setDate(textId, isoId, iso) {
+        $('#'+textId).val(iso.split('-').reverse().join('/'));
+        $('#'+isoId).val(iso);
+    }
+
+    setupDateInput('depDate', 'depDateISO');
+    setupDateInput('retDate', 'retDateISO');
+
+    // ── Trip type toggle ──
+    $('input[name="TripType"]').change(function () {
+        $('#return-date-col').toggle(this.value === 'RoundTrip');
+    });
+
+    $('#depDate').on('input', function () {
+        var iso = dmyToIso(this.value);
+        if (iso) $('#retDateISO').attr('data-min', iso);
+    });
+
+    // ── Search form submit ──
+    $('#main-search-form').submit(function (e) {
+        e.preventDefault();
+        var depIso = $('#depDateISO').val();
+        var errBox = $('#search-error');
+        errBox.hide();
+
+        if (!depIso) {
+            errBox.text('Vui lòng nhập ngày khởi hành (dd/mm/yyyy)').show();
+            return;
+        }
+        if (depIso < todayISO) {
+            errBox.text('Ngày khởi hành không được là ngày trong quá khứ').show();
+            return;
+        }
+
+        doSearch($(this).serialize());
+    });
+
+    // ── Xem tất cả chuyến bay ──
+    $('#btn-view-all').click(function () {
+        $('#sel-from').val('HAN');
+        $('#sel-to').val('SGN');
+        setDate('depDate', 'depDateISO', todayISO);
+        doSearch($('#main-search-form').serialize());
+    });
+
+    // ── Click hero flight card ──
+    $(document).on('click', '.hero-flight-card[data-from]', function () {
+        quickSearch($(this).data('from'), $(this).data('to'));
+    });
+
+    // ── Click điểm đến nổi bật ──
+    $(document).on('click', '.route-card', function () {
+        $('#sel-from').val($(this).data('from'));
+        $('#sel-to').val($(this).data('to'));
+        $('.route-card').removeClass('selected');
+        $(this).addClass('selected');
+        $('html,body').animate({ scrollTop: $('.search-container').offset().top - 20 }, 350, function () {
+            $('#depDate').focus();
+        });
+    });
+
+    function quickSearch(from, to) {
+        $('#sel-from').val(from);
+        $('#sel-to').val(to);
+        if (!$('#depDateISO').val()) setDate('depDate', 'depDateISO', todayISO);
+        doSearch($('#main-search-form').serialize());
+    }
+
+    function doSearch(formData) {
+        $.ajax({
+            url: '/Home/SearchFlights',
+            type: 'POST',
+            data: formData,
+            success: function (res) {
+                $('#homepage-body').hide();
+                $('#search-results-layout').html(res).show();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    }
+
+    function goBackToSearch() {
+        $('#search-results-layout').hide().html('');
+        $('#homepage-body').show();
+    }
+
+    function applyPromo(code) {
+        localStorage.setItem('activePromotionCode', code);
+        var notice = document.getElementById('promo-notice');
+        notice.textContent = 'Đã áp dụng mã ' + code + '. Mã sẽ được kiểm tra điều kiện ở bước đặt vé.';
+        notice.style.display = 'block';
+        notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>

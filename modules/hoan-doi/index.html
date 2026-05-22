@@ -1,79 +1,83 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module Hoan Doi Ve</title>
-  <link rel="stylesheet" href="../../wwwroot/css/site.css" />
-  <link rel="stylesheet" href="../../wwwroot/css/pages/refund-exchange.css" />
-</head>
-<body>
-  <header class="topbar">
-    <h1>Package: Hoan / Doi ve</h1>
-    <nav>
-      <a href="../../index.html">Trang chu</a>
-      <a href="../thanh-toan/index.html">Thanh toan</a>
-      <a href="../trang-thai/index.html">Trang thai ve</a>
-      <a class="active" href="../hoan-doi/index.html">Hoan / Doi ve</a>
-    </nav>
-  </header>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Module Hoàn Đổi Vé</title>
+        <link rel="stylesheet" href="../../wwwroot/css/site.css" />
+        <link rel="stylesheet" href="../../wwwroot/css/pages/refund-exchange.css" />
+    </head>
+    <body>
+        <header class="topbar">
+            <h1>Package: Hoàn / Đổi Vé</h1>
+            <nav>
+                <a href="../../index.html">Trang Chủ</a>
+                <a href="../thanh-toan/index.html">Thanh Toán</a>
+                <a href="../trang-thai/index.html">Trạng Thái Vé</a>
+                <a class="active" href="../hoan-doi/index.html">Hoàn / Đổi Vé</a>
+            </nav>
+        </header>
 
-  <main class="container">
-    <section class="grid-2">
-      <article class="card">
-        <h2>Hoan ve</h2>
-        <div class="form-grid">
-          <label>Ma ve
-            <input type="text" value="TK345678" />
-          </label>
-          <label>Email
-            <input type="text" value="demo@example.com" />
-          </label>
-        </div>
-        <ul>
-          <li><span>Gia goc</span><strong>6.000.000d</strong></li>
-          <li><span>Phi hoan</span><strong>900.000d</strong></li>
-          <li class="total"><span>Tien hoan</span><strong>5.100.000d</strong></li>
-        </ul>
-        <div class="actions">
-          <button class="ghost">Tu choi</button>
-          <button>Xac nhan hoan</button>
-        </div>
-      </article>
+        <main class="container">
+            <section class="grid-2">
+                <article class="card">
+                    <h2>Hoàn Vé</h2>
+                    <div class="form-grid">
+                        <label>
+                            Mã Vé
+                            <input type="text" value="TK345678" />
+                        </label>
+                        <label>
+                            Email
+                            <input type="text" value="demo@example.com" />
+                        </label>
+                    </div>
+                    <ul>
+                        <li><span>Giá Gốc</span><strong>6.000.000đ</strong></li>
+                        <li><span>Phí Hoàn</span><strong>900.000đ</strong></li>
+                        <li class="total"><span>Tiền Hoàn</span><strong>5.100.000đ</strong></li>
+                    </ul>
+                    <div class="actions">
+                        <button class="ghost">Từ Chối</button>
+                        <button>Xác Nhận Hoàn</button>
+                    </div>
+                </article>
 
-      <article class="card">
-        <h2>Doi ve</h2>
-        <div class="form-grid">
-          <label>Ma ve
-            <input type="text" value="TK123456" />
-          </label>
-          <label>Chuyen moi
-            <input type="text" value="VN237 - HAN -> SGN" />
-          </label>
-        </div>
-        <ul>
-          <li><span>Gia cu</span><strong>5.000.000d</strong></li>
-          <li><span>Gia moi</span><strong>5.300.000d</strong></li>
-          <li class="total"><span>Thu them</span><strong>300.000d</strong></li>
-        </ul>
-        <div class="actions">
-          <button class="ghost">Huy doi</button>
-          <button data-doi>Xac nhan doi</button>
-        </div>
-      </article>
-    </section>
+                <article class="card">
+                    <h2>Đổi Vé</h2>
+                    <div class="form-grid">
+                        <label>
+                            Mã Vé
+                            <input type="text" value="TK123456" />
+                        </label>
+                        <label>
+                            Chuyến Mới
+                            <input type="text" value="VN237 - HAN -> SGN" />
+                        </label>
+                    </div>
+                    <ul>
+                        <li><span>Giá Cũ</span><strong>5.000.000đ</strong></li>
+                        <li><span>Giá Mới</span><strong>5.300.000đ</strong></li>
+                        <li class="total"><span>Thu Thêm</span><strong>300.000đ</strong></li>
+                    </ul>
+                    <div class="actions">
+                        <button class="ghost">Hủy Đổi</button>
+                        <button data-doi>Xác Nhận Đổi</button>
+                    </div>
+                </article>
+            </section>
 
-    <section class="card flow">
-      <h3>Flow hoan ve</h3>
-      <p>Tao yeu cau pending -> Kiem tra hop le/trung lap -> Tinh tien hoan -> Hoan tien.</p>
-      <p>That bai: rollback du lieu. Thanh cong: doi trang thai sang REFUNDED.</p>
+            <section class="card flow">
+                <h3>Quy Trình Hoàn Vé</h3>
+                <p>Tạo yêu cầu pending → Kiểm tra hợp lệ/trùng lặp → Tính tiền hoàn → Hoàn tiền.</p>
+                <p>Thất bại: rollback dữ liệu. Thành công: đổi trạng thái sang REFUNDED.</p>
 
-      <h3>Flow doi ve</h3>
-      <p>Gui yeu cau doi -> Kiem tra dieu kien/cho trong -> So sanh gia moi/ cu.</p>
-      <p>Gia moi cao hon: thu them. Gia moi thap hon: co the hoan chenhlech.</p>
-    </section>
-  </main>
-</body>
-<script src="../../wwwroot/js/site.js"></script>
-<script src="../../wwwroot/js/pages/hoan-doi.js"></script>
-</html>
+                <h3>Quy Trình Đổi Vé</h3>
+                <p>Gửi yêu cầu đổi → Kiểm tra điều kiện/chỗ trống → So sánh giá mới/cũ.</p>
+                <p>Giá mới cao hơn: thu thêm. Giá mới thấp hơn: có thể hoàn chênh lệch.</p>
+            </section>
+        </main>
+        <script src="../../wwwroot/js/site.js"></script>
+        <script src="../../wwwroot/js/pages/payment.js"></script>
+    </body>
+    </html>
